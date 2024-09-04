@@ -86,7 +86,23 @@ class PureMF(BasicModel):
         loss = (1 - pos_scores).norm(2).pow(2) + neg_scores.norm(2).pow(2)
 
         return loss
-        
+
+    def sg_positive_loss(self, source, target):
+        u_emb = self.embedding_user(source.long())
+        v_emb = self.embedding_user(target.long())
+        dot_products = torch.sum(torch.mul(u_emb, v_emb), dim=1)
+        return -dot_products.sigmoid().sum()
+
+     def sg_negative_loss(self, source, target):
+        u_emb = self.embedding_user(source.long())
+        v_emb = self.embedding_user(target.long())
+        neg_dot_products = -torch.sum(torch.mul(u_emb, v_emb), dim=1)
+        return -(neg_dot_products.sigmoid().sum())
+
+    def dimension_reg(self):
+        col_sums = torch.sum(self.embedding_user.weight, dim=0)
+        return col_sums.norm(2).pow(2)
+
     def forward(self, users, items):
         users = users.long()
         items = items.long()

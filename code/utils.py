@@ -13,7 +13,7 @@ from torch import log
 from dataloader import BasicDataset
 from time import time
 from model import LightGCN
-from model import PairWiseModel
+from model import PairWiseModel, PureMF
 from sklearn.metrics import roc_auc_score
 import random
 import os
@@ -40,6 +40,45 @@ class Loss:
     
     def stageOne(self, users, pos, neg):
         raise NotImplementedError
+
+class SkipGramLoss(Loss):
+    def __init__(self,
+                 recmodel : PureMF,
+                 config: dict):
+        super(SkipGramLoss, self).__init__(recmodel, config)
+
+    def stageOne(self, users, pos, neg):
+        pos_loss = self.recmodel.sg_positive_loss(users, pos)
+        neg_loss = self.recmodel.sg_negative_loss(users, neg)
+        dimension_regularization = self.recmodel.dimension_reg()
+        total_loss = pos_loss + neg_loss
+
+        self.opt.zero_grad()
+        total_loss.backward()
+        self.opt.step()
+
+        return pos_loss, neg_loss, dimension_regularization
+
+class SkipGramAugmentedLoss(Loss):
+    def __init__(self,
+                 recmodel : PureMF,
+                 config: dict):
+        super(SkipGramPositiveLoss, self).__init__(recmodel, config)
+
+    def stageOne(self, epoch, users, pos, neg):
+        pos_loss = self.recmodel.sg_positive_loss(users, pos)
+        neg_loss = self.recmodel.sg_negative_loss(users, neg)
+        dimension_regularization = self.recmodel.dimension_reg()
+
+        assert "n_negative" in config
+        self.opt.zero_grad()
+        if epoch % config['n_negative'] == 0:
+            dimension_regularization.backward()
+        else:
+            pos_loss.backward()
+        self.opt.step()
+
+        return pos_loss, neg_loss, dimension_regularization
 
 class BPRLoss(Loss):
     def __init__(self,
