@@ -18,11 +18,10 @@ Recmodel = register.MODELS[world.model_name](world.config, dataset)
 Recmodel = Recmodel.to(world.device)
 
 loss_obj = utils.Loss(Recmodel, world.config)
-if world.config["loss_func"] == "bpr":
-    loss_obj = utils.BPRLoss(Recmodel, world.config)
-elif world.config["loss_func"] == "l2":
-    print("Sanity check")
-    loss_obj = utils.L2Loss(Recmodel, world.config)    
+if world.config["loss_func"] == "sg":
+    loss_obj = utils.SkipGramLoss(Recmodel, world.config)
+elif world.config["loss function"] == "sg aug":
+    loss_obj = utils.SkipGramAugmentedLoss(Recmodel, world.config)    
 
 weight_file = utils.getFileName()
 print(f"load and save to {weight_file}")
@@ -32,14 +31,6 @@ if world.LOAD:
         world.cprint(f"loaded model weights from {weight_file}")
     except FileNotFoundError:
         print(f"{weight_file} not exists, start from beginning")
-
-# users = torch.Tensor(list(range(1000))).long()
-# ratings = Recmodel.getUsersRating(users)
-
-# print(ratings.shape)
-# print(np.min(ratings))
-# print(np.max(ratings))
-# print(np.mean(ratings))
 
 Neg_k = 1
 

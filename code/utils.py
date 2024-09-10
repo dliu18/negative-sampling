@@ -38,7 +38,7 @@ class Loss:
         self.lr = config['lr']
         self.opt = optim.Adam(recmodel.parameters(), lr=self.lr)
     
-    def stageOne(self, users, pos, neg):
+    def stageOne(self, epoch, users, pos, neg):
         raise NotImplementedError
 
 class SkipGramLoss(Loss):
@@ -47,10 +47,10 @@ class SkipGramLoss(Loss):
                  config: dict):
         super(SkipGramLoss, self).__init__(recmodel, config)
 
-    def stageOne(self, users, pos, neg):
-        pos_loss = self.recmodel.sg_positive_loss(users, pos)
-        neg_loss = self.recmodel.sg_negative_loss(users, neg)
-        dimension_regularization = self.recmodel.dimension_reg()
+    def stageOne(self, epoch, users, pos, neg):
+        pos_loss = self.model.sg_positive_loss(users, pos)
+        neg_loss = self.model.sg_negative_loss(users, neg)
+        dimension_regularization = self.model.dimension_reg()
         total_loss = pos_loss + neg_loss
 
         self.opt.zero_grad()
@@ -66,9 +66,9 @@ class SkipGramAugmentedLoss(Loss):
         super(SkipGramPositiveLoss, self).__init__(recmodel, config)
 
     def stageOne(self, epoch, users, pos, neg):
-        pos_loss = self.recmodel.sg_positive_loss(users, pos)
-        neg_loss = self.recmodel.sg_negative_loss(users, neg)
-        dimension_regularization = self.recmodel.dimension_reg()
+        pos_loss = self.model.sg_positive_loss(users, pos)
+        neg_loss = self.model.sg_negative_loss(users, neg)
+        dimension_regularization = self.model.dimension_reg()
 
         assert "n_negative" in config
         self.opt.zero_grad()
@@ -79,38 +79,6 @@ class SkipGramAugmentedLoss(Loss):
         self.opt.step()
 
         return pos_loss, neg_loss, dimension_regularization
-
-class BPRLoss(Loss):
-    def __init__(self,
-                 recmodel : PairWiseModel,
-                 config: dict):
-        super(BPRLoss, self).__init__(recmodel, config)
-        
-    def stageOne(self, users, pos, neg):
-        loss, reg_loss = self.model.bpr_loss(users, pos, neg)
-        reg_loss = reg_loss*self.weight_decay
-        loss = loss + reg_loss
-
-        self.opt.zero_grad()
-        loss.backward()
-        self.opt.step()
-
-        return loss.cpu().item()
-
-class L2Loss(Loss):
-    def __init__(self,
-                 recmodel : PairWiseModel,
-                 config: dict):
-        super(L2Loss, self).__init__(recmodel, config)
-
-    def stageOne(self, users, pos, neg):
-        loss = self.model.l2_loss(users, pos, neg)
-
-        self.opt.zero_grad()
-        loss.backward()
-        self.opt.step()
-
-        return loss.cpu().item()
         
 def UniformSample_original(dataset, neg_ratio = 1):
     dataset : BasicDataset

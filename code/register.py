@@ -17,7 +17,6 @@ print("tensorboard:", world.tensorboard)
 print("LOAD:", world.LOAD)
 print("Weight path:", world.PATH)
 print("Test Topks:", world.topks)
-print("using bpr loss")
 print('===========end===================')
 
 MODELS = {

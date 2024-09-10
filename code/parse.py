@@ -10,8 +10,8 @@ import argparse
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Go lightGCN")
-    parser.add_argument('--loss_func', type=str,default="bpr",
-                        help="loss function to use between bpr or l2")
+    parser.add_argument('--loss_func', type=str,default="sg",
+                        help="loss function to use between 'sg' or 'sg aug'")
     parser.add_argument('--reg_lam', type=float,default=0.5,
                         help="regularization hyperparameter")
     parser.add_argument('--bpr_batch', type=int,default=2048,
@@ -40,6 +40,8 @@ def parse_args():
                         help="@k test list")
     parser.add_argument('--tensorboard', type=int,default=1,
                         help="enable tensorboard")
+    parser.add_argument('--n_negative', type=int,default=10,
+                        help="Cadence (in epochs) at which the dimension regularization is applied.")
     parser.add_argument('--comment', type=str,default="lgn")
     parser.add_argument('--load', type=int,default=0)
     parser.add_argument('--epochs', type=int,default=1000)

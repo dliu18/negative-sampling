@@ -24,6 +24,8 @@ class BasicModel(nn.Module):
 class PairWiseModel(BasicModel):
     def __init__(self):
         super(PairWiseModel, self).__init__()
+
+    # TODO: replace with sg_positive, sg_negative, dimension_reg
     def bpr_loss(self, users, pos, neg):
         """
         Parameters:
@@ -91,9 +93,9 @@ class PureMF(BasicModel):
         u_emb = self.embedding_user(source.long())
         v_emb = self.embedding_user(target.long())
         dot_products = torch.sum(torch.mul(u_emb, v_emb), dim=1)
-        return -dot_products.sigmoid().sum()
+        return -1 * dot_products.sigmoid().sum()
 
-     def sg_negative_loss(self, source, target):
+    def sg_negative_loss(self, source, target):
         u_emb = self.embedding_user(source.long())
         v_emb = self.embedding_user(target.long())
         neg_dot_products = -torch.sum(torch.mul(u_emb, v_emb), dim=1)
@@ -111,6 +113,7 @@ class PureMF(BasicModel):
         scores = torch.sum(users_emb*items_emb, dim=1)
         return self.f(scores)
 
+# TODO: to delete
 class LightGCN(BasicModel):
     def __init__(self, 
                  config:dict, 

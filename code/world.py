@@ -49,6 +49,7 @@ config['A_split'] = False
 config['bigdata'] = False
 config["loss_func"] = args.loss_func
 config["reg_lam"] = args.reg_lam
+config["n_negative"] = args.n_negative
 
 GPU = torch.cuda.is_available()
 device = torch.device('cuda' if GPU else "cpu")

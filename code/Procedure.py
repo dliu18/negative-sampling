@@ -23,34 +23,41 @@ from sklearn.metrics import roc_auc_score
 CORES = multiprocessing.cpu_count() // 2
 
 
+# expects the loss to be either SkipGramAugmentedLoss or SkipGramLoss
 def train_original(dataset, recommend_model, loss_obj, epoch, neg_k=1, w=None):
     Recmodel = recommend_model
-    Recmodel.train()
+    Recmodel.train() # puts the model in training mode
     loss_obj: utils.Loss = loss_obj
     
     with timer(name="Sample"):
         S = utils.UniformSample_original(dataset)
     users = torch.Tensor(S[:, 0]).long()
-    posItems = torch.Tensor(S[:, 1]).long()
-    negItems = torch.Tensor(S[:, 2]).long()
+    posUsers = torch.Tensor(S[:, 1]).long()
+    negUsers = torch.Tensor(S[:, 2]).long()
 
     users = users.to(world.device)
-    posItems = posItems.to(world.device)
-    negItems = negItems.to(world.device)
-    users, posItems, negItems = utils.shuffle(users, posItems, negItems)
+    posUsers = posUsers.to(world.device)
+    negUsers = negUsers.to(world.device)
+    users, posUsers, negUsers = utils.shuffle(users, posUsers, negUsers)
     total_batch = len(users) // world.config['bpr_batch_size'] + 1
     aver_loss = 0.
-    for (batch_i,
-         (batch_users,
-          batch_pos,
-          batch_neg)) in enumerate(utils.minibatch(users,
-                                                   posItems,
-                                                   negItems,
-                                                   batch_size=world.config['bpr_batch_size'])):
-        cri = loss_obj.stageOne(batch_users, batch_pos, batch_neg)
-        aver_loss += cri
+    for (
+            batch_i,
+            (batch_users, batch_pos, batch_neg)
+        ) in enumerate(
+            utils.minibatch(users,
+                posUsers,
+                negUsers,
+                batch_size=world.config['bpr_batch_size']
+            )):
+        pos_loss, neg_loss, dimension_regularization = loss_obj.stageOne(epoch, batch_users, batch_pos, batch_neg)
+        aver_loss += (pos_loss + neg_loss)
         if world.tensorboard:
-            w.add_scalar(f'Loss/loss', cri, epoch * int(len(users) / world.config['bpr_batch_size']) + batch_i)
+            w.add_scalar(f'Loss/positive_loss', pos_loss, epoch * int(len(users) / world.config['bpr_batch_size']) + batch_i)
+            w.add_scalar(f'Loss/negative_loss', neg_loss, epoch * int(len(users) / world.config['bpr_batch_size']) + batch_i)
+            w.add_scalar(f'Loss/total_loss', pos_loss + neg_loss, epoch * int(len(users) / world.config['bpr_batch_size']) + batch_i)
+            w.add_scalar(f'Loss/dimension_regularization', dimension_regularization, epoch * int(len(users) / world.config['bpr_batch_size']) + batch_i)
+
     aver_loss = aver_loss / total_batch
     time_info = timer.dict()
     timer.zero()
