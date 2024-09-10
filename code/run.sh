@@ -1,0 +1,13 @@
+python main.py \
+--decay=1e-4 \
+--lr=0.001 \
+--model="mf" \
+--seed=2020 \
+--dataset="lastfm-small" \
+--topks="[20]" \
+--recdim=10 \
+--loss_func="sg" \
+--reg_lam 0.5 \
+--epochs 100 \
+--testbatch 50 \
+--n_negative 10
