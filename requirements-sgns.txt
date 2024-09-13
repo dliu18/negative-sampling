@@ -1,0 +1,8 @@
+pytorch-cuda=12.1
+pytorch
+torchvision
+torchaudio
+pyg
+pytorch-cluster
+tensorboardx
+numpy=1

@@ -12,8 +12,7 @@ import numpy as np
 from torch import log
 from dataloader import BasicDataset
 from time import time
-from model import LightGCN
-from model import PairWiseModel, PureMF
+from model import BasicModel, PureMF
 from sklearn.metrics import roc_auc_score
 import random
 import os
@@ -31,10 +30,9 @@ except:
 
 class Loss:    
     def __init__(self,
-                 recmodel : PairWiseModel,
+                 recmodel : BasicModel,
                  config : dict):
         self.model = recmodel
-        self.weight_decay = config['decay']
         self.lr = config['lr']
         self.opt = optim.Adam(recmodel.parameters(), lr=self.lr)
     
@@ -57,13 +55,13 @@ class SkipGramLoss(Loss):
         total_loss.backward()
         self.opt.step()
 
-        return pos_loss, neg_loss, dimension_regularization
+        return pos_loss.to('cpu'), neg_loss.to('cpu'), dimension_regularization.to('cpu')
 
 class SkipGramAugmentedLoss(Loss):
     def __init__(self,
                  recmodel : PureMF,
                  config: dict):
-        super(SkipGramPositiveLoss, self).__init__(recmodel, config)
+        super(SkipGramAugmentedLoss, self).__init__(recmodel, config)
 
     def stageOne(self, epoch, users, pos, neg):
         pos_loss = self.model.sg_positive_loss(users, pos)

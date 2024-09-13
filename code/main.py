@@ -20,7 +20,7 @@ Recmodel = Recmodel.to(world.device)
 loss_obj = utils.Loss(Recmodel, world.config)
 if world.config["loss_func"] == "sg":
     loss_obj = utils.SkipGramLoss(Recmodel, world.config)
-elif world.config["loss function"] == "sg aug":
+elif world.config["loss_func"] == "sg_aug":
     loss_obj = utils.SkipGramAugmentedLoss(Recmodel, world.config)    
 
 weight_file = utils.getFileName()
@@ -46,10 +46,14 @@ else:
 try:
     for epoch in range(world.TRAIN_epochs):
         start = time.time()
-        if epoch %10 == 0:
-            cprint("[TEST]")
-            Procedure.Test(dataset, Recmodel, epoch, w, world.config['multicore'])
-        output_information = Procedure.train_original(dataset, Recmodel, loss_obj, epoch, neg_k=Neg_k,w=w)
+        # if epoch %10 == 0:
+        #     cprint("[TEST]")
+        #     Procedure.Test(dataset, Recmodel, epoch, w, world.config['multicore'])
+        output_information = Procedure.train_original(dataset, 
+            Recmodel, 
+            loss_obj, 
+            epoch, 
+            writer=w)
         print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
         torch.save(Recmodel.state_dict(), weight_file)
 finally:

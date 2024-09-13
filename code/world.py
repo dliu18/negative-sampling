@@ -30,20 +30,16 @@ if not os.path.exists(FILE_PATH):
 
 
 config = {}
-all_dataset = ['lastfm', 'gowalla', 'yelp2018', 'amazon-book', 'lastfm-small']
-all_models  = ['mf', 'lgn']
+all_dataset = ['CiteSeer', 'Cora', 'PubMed']
+all_models  = ['mf']
 # config['batch_size'] = 4096
 # TODO: nice to have would be removing "bpr" from these constant names
-config['bpr_batch_size'] = args.bpr_batch
+config['batch_size'] = args.batch_size
 config['latent_dim_rec'] = args.recdim
-config['lightGCN_n_layers']= args.layer
 config['dropout'] = args.dropout
-config['keep_prob']  = args.keepprob
-config['A_n_fold'] = args.a_fold
 config['test_u_batch_size'] = args.testbatch
 config['multicore'] = args.multicore
 config['lr'] = args.lr
-config['decay'] = args.decay
 config['pretrain'] = args.pretrain
 config['A_split'] = False
 config['bigdata'] = False
