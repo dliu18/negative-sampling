@@ -51,7 +51,8 @@ class SmallBenchmark(BasicDataset):
             name = name,
         )
         data = dataset[0]
-
+        self.full_data = data
+        
         split = RandomLinkSplit(is_undirected=data.is_undirected(),
             num_val = 0.0,
             num_test = 0.2,

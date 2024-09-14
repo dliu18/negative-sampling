@@ -5,4 +5,5 @@ torchaudio
 pyg
 pytorch-cluster
 tensorboardx
+ogb
 numpy=1

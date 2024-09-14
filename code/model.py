@@ -60,10 +60,10 @@ class PureMF(BasicModel):
         col_sums = torch.sum(self.embedding_user.weight, dim=0)
         return col_sums.norm(2).pow(2)
 
-    def forward(self, users, items):
-        users = users.long()
-        items = items.long()
-        users_emb = self.embedding_user(users)
-        items_emb = self.embedding_item(items)
-        scores = torch.sum(users_emb*items_emb, dim=1)
+    def forward(self, src, dst):
+        src = src.long()
+        dst = dst.long()
+        src_emb = self.embedding_user(src)
+        dst_emb = self.embedding_item(dst)
+        scores = torch.sum(users_emb*dst_emb, dim=1)
         return self.f(scores)
