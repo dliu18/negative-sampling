@@ -19,7 +19,7 @@ args = parse_args()
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 CODE_PATH = join(ROOT_PATH, 'code')
 DATA_PATH = join(ROOT_PATH, 'data')
-BOARD_PATH = join(CODE_PATH, 'runs')
+BOARD_PATH = join(CODE_PATH, 'runs', 'args.dataset')
 FILE_PATH = join(CODE_PATH, 'checkpoints/pca-to-lgn')
 import sys
 sys.path.append(join(CODE_PATH, 'sources'))
@@ -30,10 +30,8 @@ if not os.path.exists(FILE_PATH):
 
 
 config = {}
-all_dataset = ['CiteSeer', 'Cora', 'PubMed']
-all_models  = ['mf']
-# config['batch_size'] = 4096
-# TODO: nice to have would be removing "bpr" from these constant names
+
+config['base_model'] = args.base_model
 config['batch_size'] = args.batch_size
 config['latent_dim_rec'] = args.recdim
 config['dropout'] = args.dropout
@@ -53,13 +51,6 @@ CORES = multiprocessing.cpu_count() // 2
 seed = args.seed
 
 dataset = args.dataset
-model_name = args.model
-if dataset not in all_dataset:
-    raise NotImplementedError(f"Haven't supported {dataset} yet!, try {all_dataset}")
-if model_name not in all_models:
-    raise NotImplementedError(f"Haven't supported {model_name} yet!, try {all_models}")
-
-
 
 
 TRAIN_epochs = args.epochs

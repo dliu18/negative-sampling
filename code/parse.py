@@ -12,6 +12,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Go lightGCN")
     parser.add_argument('--loss_func', type=str,default="sg",
                         help="loss function to use between 'sg' or 'sg aug'")
+    parser.add_argument('--base_model', type=str,default="n2v",
+                        help="base model to use between 'n2v' or 'line'")
     parser.add_argument('--reg_lam', type=float,default=0.5,
                         help="regularization hyperparameter")
     parser.add_argument('--batch_size', type=int,default=128,
@@ -34,7 +36,7 @@ def parse_args():
                         help="enable tensorboard")
     parser.add_argument('--n_negative', type=int,default=10,
                         help="Cadence (in epochs) at which the dimension regularization is applied.")
-    parser.add_argument('--comment', type=str,default="lgn")
+    parser.add_argument('--comment', type=str,default="")
     parser.add_argument('--load', type=int,default=0)
     parser.add_argument('--epochs', type=int,default=1000)
     parser.add_argument('--multicore', type=int, default=0, help='whether we use multiprocessing or not in test')

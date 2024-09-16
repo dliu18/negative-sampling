@@ -1,5 +1,6 @@
 import world
 import utils
+from model import SGModel
 from world import cprint
 import torch
 import numpy as np
@@ -14,20 +15,20 @@ print(">>SEED:", world.seed)
 import register
 from register import dataset
 
-Recmodel = register.MODELS[world.model_name](world.config, dataset)
-Recmodel = Recmodel.to(world.device)
+sg_model = SGModel(world.config, dataset)
+sg_model = sg_model.to(world.device)
 
-loss_obj = utils.Loss(Recmodel, world.config)
+loss_obj = utils.Loss(sg_model, world.config)
 if world.config["loss_func"] == "sg":
-    loss_obj = utils.SkipGramLoss(Recmodel, world.config)
+    loss_obj = utils.SkipGramLoss(sg_model, world.config)
 elif world.config["loss_func"] == "sg_aug":
-    loss_obj = utils.SkipGramAugmentedLoss(Recmodel, world.config)    
+    loss_obj = utils.SkipGramAugmentedLoss(sg_model, world.config)    
 
 weight_file = utils.getFileName()
 print(f"load and save to {weight_file}")
 if world.LOAD:
     try:
-        Recmodel.load_state_dict(torch.load(weight_file,map_location=torch.device('cpu')))
+        sg_model.load_state_dict(torch.load(weight_file,map_location=torch.device('cpu')))
         world.cprint(f"loaded model weights from {weight_file}")
     except FileNotFoundError:
         print(f"{weight_file} not exists, start from beginning")
@@ -46,16 +47,15 @@ else:
 try:
     for epoch in range(world.TRAIN_epochs):
         start = time.time()
-        # if epoch %10 == 0:
-        #     cprint("[TEST]")
-        #     Procedure.Test(dataset, Recmodel, epoch, w, world.config['multicore'])
-        output_information = Procedure.train_original(dataset, 
-            Recmodel, 
+        if epoch % 1 == 0:
+            Procedure.test(dataset, sg_model, epoch, w)
+        output_information = Procedure.train(dataset, 
+            sg_model, 
             loss_obj, 
             epoch, 
             writer=w)
         print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
-        torch.save(Recmodel.state_dict(), weight_file)
+        torch.save(sg_model.state_dict(), weight_file)
 finally:
     if world.tensorboard:
         w.close()

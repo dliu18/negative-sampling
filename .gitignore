@@ -17,4 +17,4 @@ __pycache__/
 data/
 .ipynb_checkpoints/*
 code/.ipynb_checkpoints/*
-code/datasts/
+code/dataset/

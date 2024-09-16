@@ -44,20 +44,19 @@ class BasicDataset(Dataset):
         # batches of edges
         raise NotImplementedError
 
-    #TODO 
     def get_train_loader_edges(self, batch_size, sample_negatives):
         '''
         Data loader that returns batches of edges (positives) and uniform random target nodes (negatives)
         '''
         raise NotImplementedError
 
-    def get_test_data(self): (2, num_test)
+    def get_test_data(self):
         '''
         Returns the full test edge set in COO format. Values are node indices. Shape should be (2, num_test)
         '''
         raise NotImplementedError
 
-    def get_hits_negatives(self):
+    def get_hits_negatives(self): 
         '''
         Returns the negatives used to compute Hits@K. The negatives are shared by all positive edges and there are a
         predetermined number of negatives. Output is of shape (2, global_num_negative)
@@ -121,7 +120,21 @@ class SmallBenchmark(BasicDataset):
         loader = model.loader(batch_size=batch_size, shuffle=True, num_workers=1)
         return loader
 
+    def _sample_edges(self, batch):
+        pos = self.train_edges[:, batch].to(self.device)
+        neg = pos.clone()
 
+        generator = torch.Generator(device=self.device)
+        generator.manual_seed(self.seed)
+        neg[1] = torch.randint(high=self.num_users, generator=generator, size=neg.size(1))
+        return pos.t(), neg.t()
+
+    def get_train_loader_edges(self, batch_size, sample_negatives):
+        '''
+        Data loader that returns batches of edges (positives) and uniform random target nodes (negatives)
+        '''
+        return DataLoader(range(self.n_train_edges), collate_fn=self._sample_edges)
+    
     def get_test_data(self):
         '''
         Returns the full test edge set in COO format. Values are node indices. Shape should be (2, num_test)
@@ -186,7 +199,6 @@ class OGBBenchmark(BasicDataset):
         loader = model.loader(batch_size=batch_size, shuffle=True, num_workers=1)
         return loader
 
-
     def get_test_data(self):
         '''
         Returns the full test edge set in COO format. Values are node indices. Shape should be (2, num_test)
@@ -198,10 +210,23 @@ class OGBBenchmark(BasicDataset):
         Returns the negatives used to compute Hits@K. The negatives are shared by all positive edges and there are a
         predetermined number of negatives. Output is of shape (2, global_num_negative)
         '''
+        if "edge_neg" in self.split_edge["test"]:
+            return self.split_edge["test"]["edge_neg"].t()
+        else:
+            generator = torch.Generator(device=self.device)
+            generator.manual_seed(self.seed)
+            return torch.randint(high=self.num_users, generator=generator, size=(2, NUM_HITS_NEGATIVES))
+
 
     def get_mrr_negatives(self):
         '''
         Returns the negatives used to compute MRR. Each test edge has a slate of "num_neg" negatives to compare against.
         Output is of shape (num_test, num_neg)
         '''
+        if "target_node_neg" in self.split_edge["test"]:
+            return self.split_edge["test"]["target_node_neg"]
+        else:
+            generator = torch.Generator(device=self.device)
+            generator.manual_seed(self.seed)
+            return torch.randint(high=self.num_users, generator=generator, size=(self.n_test_edges, NUM_MRR_NEGATIVES))
 

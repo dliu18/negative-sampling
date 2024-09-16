@@ -27,11 +27,11 @@ class BasicModel(nn.Module):
     def dimension_reg(self):
         raise NotImplementedError
     
-class PureMF(BasicModel):
+class SGModel(BasicModel):
     def __init__(self, 
                  config:dict, 
                  dataset:BasicDataset):
-        super(PureMF, self).__init__()
+        super(SGModel, self).__init__()
         self.num_users  = dataset.n_users
         self.latent_dim = config['latent_dim_rec']
         self.lam = config["reg_lam"]
@@ -40,9 +40,7 @@ class PureMF(BasicModel):
         
     def __init_weight(self):
         self.embedding_user = torch.nn.Embedding(
-            num_embeddings=self.num_users, embedding_dim=self.latent_dim)
-        print("using Normal distribution N(0,1) initialization for PureMF")
-        
+            num_embeddings=self.num_users, embedding_dim=self.latent_dim)        
 
     def sg_positive_loss(self, source, target):
         u_emb = self.embedding_user(source.long())
