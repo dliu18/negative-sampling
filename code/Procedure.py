@@ -11,7 +11,7 @@ import numpy as np
 import torch
 import utils
 import dataloader
-import evaluator
+from evaluator import Evaluator
 from pprint import pprint
 from utils import timer
 from time import time
@@ -66,7 +66,7 @@ def train(dataset, recommend_model, loss_obj, epoch, writer=None):
             writer.add_scalar(f'Loss/dimension_regularization', dimension_regularization, epoch * int(num_users / world.config['batch_size']) + batch_i)
         batch_i += 1
     aver_loss = aver_loss / total_batch
-    return f"loss{aver_loss:.3f}"
+    return f"loss: {aver_loss:,}"
     
      
 def test(dataset, sg_model, epoch, writer):
@@ -74,10 +74,10 @@ def test(dataset, sg_model, epoch, writer):
 
     # test MRR
     mrr_negatives = dataset.get_mrr_negatives()
-    label, avg_mrr = evaluator.test_mrr(sg_model, dataset)
+    label, avg_mrr = Evaluator.test_mrr(sg_model, dataset)
     writer.add_scalar(f'metrics/{label}', avg_mrr, epoch)
 
     # test Hits@k
     hits_negatives = dataset.get_hits_negatives()
-    label, avg_hits = evaluator.test_hits(sg_model, dataset)
+    label, avg_hits = Evaluator.test_hits(sg_model, dataset)
     writer.add_scalar(f'metrics/{label}', avg_hits, epoch)

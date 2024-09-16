@@ -1,9 +1,10 @@
 python main.py \
---lr=0.001 \
---model="mf" \
---seed=2020 \
---dataset="CiteSeer" \
---topks="[20]" \
---recdim=128 \
+--base_model="n2v" \
 --loss_func="sg" \
---epochs 50
+--n_negative=1 \
+--lr=0.01 \
+--seed=2020 \
+--dataset="ogbl-collab" \
+--recdim=128 \
+--epochs 50 \
+--comment="Test OGB"

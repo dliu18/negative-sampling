@@ -12,6 +12,7 @@ import torch
 from dataloader import BasicDataset
 from torch import nn
 import numpy as np
+import world
 
 
 class BasicModel(nn.Module):    
@@ -35,33 +36,37 @@ class SGModel(BasicModel):
         self.num_users  = dataset.n_users
         self.latent_dim = config['latent_dim_rec']
         self.lam = config["reg_lam"]
+        self.device = world.device
+        self.eps = 1e-15
         self.f = nn.Sigmoid()
         self.__init_weight()
         
     def __init_weight(self):
         self.embedding_user = torch.nn.Embedding(
-            num_embeddings=self.num_users, embedding_dim=self.latent_dim)        
+            num_embeddings=self.num_users, 
+            embedding_dim=self.latent_dim,
+            device=self.device)        
 
     def sg_positive_loss(self, source, target):
         u_emb = self.embedding_user(source.long())
         v_emb = self.embedding_user(target.long())
         dot_products = torch.sum(torch.mul(u_emb, v_emb), dim=1)
-        return -1 * dot_products.sigmoid().sum()
+        return -((dot_products.sigmoid() + self.eps).log().sum())
 
     def sg_negative_loss(self, source, target):
         u_emb = self.embedding_user(source.long())
         v_emb = self.embedding_user(target.long())
-        neg_dot_products = -torch.sum(torch.mul(u_emb, v_emb), dim=1)
-        return -(neg_dot_products.sigmoid().sum())
+        dot_products = torch.sum(torch.mul(u_emb, v_emb), dim=1)
+        return -((1 - dot_products.sigmoid() + self.eps).log().sum())
 
     def dimension_reg(self):
         col_sums = torch.sum(self.embedding_user.weight, dim=0)
         return col_sums.norm(2).pow(2)
 
-    def forward(self, src, dst):
+    def forward(self, src, tgt):
         src = src.long()
-        dst = dst.long()
+        tgt = tgt.long()
         src_emb = self.embedding_user(src)
-        dst_emb = self.embedding_item(dst)
-        scores = torch.sum(users_emb*dst_emb, dim=1)
-        return self.f(scores)
+        tgt_emb = self.embedding_user(tgt)
+        scores = torch.sum(src_emb*tgt_emb, dim=1)
+        return scores

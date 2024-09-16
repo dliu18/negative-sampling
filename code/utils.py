@@ -12,7 +12,7 @@ import numpy as np
 from torch import log
 from dataloader import BasicDataset
 from time import time
-from model import BasicModel, PureMF
+from model import BasicModel, SGModel
 from sklearn.metrics import roc_auc_score
 import random
 import os
@@ -30,20 +30,20 @@ except:
 
 class Loss:    
     def __init__(self,
-                 recmodel : BasicModel,
+                 sg_model : BasicModel,
                  config : dict):
-        self.model = recmodel
+        self.model = sg_model
         self.lr = config['lr']
-        self.opt = optim.Adam(recmodel.parameters(), lr=self.lr)
+        self.opt = optim.Adam(sg_model.parameters(), lr=self.lr)
     
     def stageOne(self, epoch, users, pos, neg):
         raise NotImplementedError
 
 class SkipGramLoss(Loss):
     def __init__(self,
-                 recmodel : PureMF,
+                 sg_model : SGModel,
                  config: dict):
-        super(SkipGramLoss, self).__init__(recmodel, config)
+        super(SkipGramLoss, self).__init__(sg_model, config)
 
     def stageOne(self, epoch, users, pos, neg):
         pos_loss = self.model.sg_positive_loss(users, pos)
@@ -59,9 +59,9 @@ class SkipGramLoss(Loss):
 
 class SkipGramAugmentedLoss(Loss):
     def __init__(self,
-                 recmodel : PureMF,
+                 sg_model : SGModel,
                  config: dict):
-        super(SkipGramAugmentedLoss, self).__init__(recmodel, config)
+        super(SkipGramAugmentedLoss, self).__init__(sg_model, config)
 
     def stageOne(self, epoch, users, pos, neg):
         pos_loss = self.model.sg_positive_loss(users, pos)
@@ -134,24 +134,8 @@ def set_seed(seed):
     torch.manual_seed(seed)
 
 def getFileName():
-    if world.model_name == 'mf':
-        file = f"mf-{world.dataset}-{world.config['latent_dim_rec']}.pth.tar"
-    elif world.model_name == 'lgn':
-        file = f"lgn-{world.dataset}-{world.config['loss_func']}-{world.config['lightGCN_n_layers']}-{world.config['latent_dim_rec']}-{world.config['reg_lam']}.pth.tar"
+    file = f"{world.config['base_model']}-{world.config['loss_func']}-{world.config['n_negative']}-{world.dataset}.pth.tar"
     return os.path.join(world.FILE_PATH,file)
-
-def minibatch(*tensors, **kwargs):
-
-    batch_size = kwargs.get('batch_size', world.config['bpr_batch_size'])
-
-    if len(tensors) == 1:
-        tensor = tensors[0]
-        for i in range(0, len(tensor), batch_size):
-            yield tensor[i:i + batch_size]
-    else:
-        for i in range(0, len(tensors[0]), batch_size):
-            yield tuple(x[i:i + batch_size] for x in tensors)
-
 
 def shuffle(*arrays, **kwargs):
 
