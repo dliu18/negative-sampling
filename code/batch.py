@@ -50,7 +50,7 @@ def test_mrr(model, negatives_for_mrr, test_data, K):
 		dst_emb = model(test_batch_edges[1])
 		y_pos = torch.mul(src_emb, dst_emb).sum(dim = 1)
 		total_mrr += len(test_batch) * _get_mrr(y_pos, y_neg[test_batch_edges[0]])
-	avg_mrr = total_mrr / test_data.num_nodes
+	avg_mrr = total_mrr / test_data.num_edges
 	print(f'MRR: {avg_mrr:.4f}')
 
 @torch.no_grad()

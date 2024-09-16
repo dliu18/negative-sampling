@@ -29,7 +29,7 @@ def train_original(dataset, recommend_model, loss_obj, epoch, writer=None):
     Recmodel.train() # puts the model in training mode
     loss_obj: utils.Loss = loss_obj
 
-    loader = dataset.get_train_loader(
+    loader = dataset.get_train_loader_rw(
         batch_size = world.config['batch_size'], 
         sample_negatives = True)
     num_users = dataset.n_users
