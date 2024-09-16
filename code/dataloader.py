@@ -199,6 +199,22 @@ class OGBBenchmark(BasicDataset):
         loader = model.loader(batch_size=batch_size, shuffle=True, num_workers=1)
         return loader
 
+    def _sample_edges(self, batch):
+        pos = self.train_edges[:, batch].to(self.device)
+        neg = pos.clone()
+
+        generator = torch.Generator(device='cpu')
+        generator.manual_seed(self.seed)
+        neg[1] = torch.randint(high=self.n_users, generator=generator, size=(neg.size(1),)).to(self.device)
+        return pos.t(), neg.t()
+
+    def get_train_loader_edges(self, batch_size, sample_negatives):
+        '''
+        Data loader that returns batches of edges (positives) and uniform random target nodes (negatives)
+        '''
+        return DataLoader(range(self.n_train_edges), collate_fn=self._sample_edges, batch_size=batch_size)
+    
+
     def get_test_data(self):
         '''
         Returns the full test edge set in COO format. Values are node indices. Shape should be (2, num_test)
