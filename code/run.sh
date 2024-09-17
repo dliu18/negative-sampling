@@ -1,11 +1,11 @@
 python main.py \
 --base_model="n2v" \
 --loss_func="sg_aug" \
---n_negative=1 \
---lr=0.01 \
+--n_negative=100000000000 \
+--lr=0.1 \
+--lam=0.01 \
 --seed=2020 \
---dataset="Cora" \
+--dataset="CiteSeer" \
 --recdim=128 \
 --batch_size=128 \
---epochs 10 \
---comment="Test OGB"
+--epochs 25

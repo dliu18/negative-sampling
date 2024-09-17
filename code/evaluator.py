@@ -8,16 +8,19 @@ EVAL_BATCH_SIZE = 128
 class Evaluator:
 	@staticmethod
 	@torch.no_grad()
-	def test_mrr(sg_model, dataset):
-		def _get_negative_scores(sg_model, test_edges, negatives_for_mrr):
+	def test_mrr(sg_model, dataset, test_set):
+		def _get_negative_scores(sg_model, dataset, test_set):
 			'''
 			negatives_for_hits: tensor of shape (n, K) containing the indices of random dst nodes
 			'''
 			scores = []
-			K = negatives_for_mrr.size(1)
-			for src_idxs in DataLoader(range(negatives_for_mrr.size(0)), EVAL_BATCH_SIZE, shuffle = False):
-				src = test_edges[0][src_idxs].repeat_interleave(K)
-				dst = negatives_for_mrr[src_idxs].view(-1)
+			eval_edges = dataset.get_eval_data(test_set)
+			for src_idxs in DataLoader(range(eval_edges.size(1)), EVAL_BATCH_SIZE, shuffle = False):
+				negatives_for_mrr = dataset.get_mrr_negatives(src_idxs, test_set)
+				K = negatives_for_mrr.size(1)
+
+				src = eval_edges[0][src_idxs].repeat_interleave(K)
+				dst = negatives_for_mrr.view(-1)
 				scores.append(
 					sg_model(src, dst)\
 					.view(len(src_idxs), -1)
@@ -37,22 +40,21 @@ class Evaluator:
 			return mrr_list.mean()
 
 		sg_model.eval()
-		test_edges = dataset.get_test_data()
-		negatives_for_mrr = dataset.get_mrr_negatives()
 
-		y_neg = _get_negative_scores(sg_model, test_edges, negatives_for_mrr)
+		eval_edges = dataset.get_eval_data(test_set)
+		y_neg = _get_negative_scores(sg_model, dataset, test_set)
 		total_mrr = 0.
-		for test_batch in DataLoader(range(dataset.n_test_edges), EVAL_BATCH_SIZE, shuffle = False):
-			test_batch_edges = test_edges[:, test_batch]
-			y_pos = sg_model(test_batch_edges[0], test_batch_edges[1])
-			total_mrr += len(test_batch) * _get_mrr(y_pos, y_neg[test_batch])
-		avg_mrr = total_mrr / test_edges.size(1)
+		for eval_batch in DataLoader(range(eval_edges.size(1)), EVAL_BATCH_SIZE, shuffle = False):
+			eval_batch_edges = eval_edges[:, eval_batch]
+			y_pos = sg_model(eval_batch_edges[0], eval_batch_edges[1])
+			total_mrr += len(eval_batch) * _get_mrr(y_pos, y_neg[eval_batch])
+		avg_mrr = total_mrr / eval_edges.size(1)
 		print(f'MRR: {avg_mrr:.4f}')
 		return "MRR", avg_mrr
 
 	@staticmethod
 	@torch.no_grad()
-	def test_hits(sg_model, dataset):
+	def test_hits(sg_model, dataset, test_set):
 		def _get_negative_scores(sg_model, negatives_for_hits):
 			'''
 			negatives_for_hits: tensor of shape (2, num_negatives) containing indices of nodes
@@ -64,24 +66,24 @@ class Evaluator:
 			return torch.sum(y_pos > threshold) / len(y_pos)
 
 		sg_model.eval()
-		test_edges = dataset.get_test_data()
-		negatives_for_hits = dataset.get_hits_negatives()
+		eval_edges = dataset.get_eval_data(test_set)
+		negatives_for_hits = dataset.get_hits_negatives(test_set)
 		device = negatives_for_hits.device
 		K = 50
 
 		y_neg = _get_negative_scores(sg_model, negatives_for_hits)
 		total_hits = 0.
-		for test_batch in DataLoader(range(test_edges.size(1)), EVAL_BATCH_SIZE, shuffle = False):
+		for eval_batch in DataLoader(range(eval_edges.size(1)), EVAL_BATCH_SIZE, shuffle = False):
 			# print(test_batch)
-			test_batch_edges = test_edges[:, test_batch]
+			eval_batch_edges = eval_edges[:, eval_batch]
 			y_pos = sg_model(
-				test_batch_edges[0], 
-				test_batch_edges[1]
+				eval_batch_edges[0], 
+				eval_batch_edges[1]
 			)
 			hits_batch = _get_hits(y_pos, y_neg, K)
 
-			total_hits += hits_batch * test_batch.size(0)
+			total_hits += hits_batch * eval_batch.size(0)
 
-		avg_hits = total_hits / test_edges.size(1)
+		avg_hits = total_hits / eval_edges.size(1)
 		print(f'Hits@{K}: {avg_hits:.4f}')
 		return f'Hits@{K}', avg_hits

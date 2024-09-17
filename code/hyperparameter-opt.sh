@@ -1,11 +1,13 @@
 #!/bin/bash
 
 # Define the values for base_model and loss_func
-dataset="Cora"
+dataset="$1"
+epochs="$2"
+
 base_models=("n2v" "line")
 loss_funcs=("sg" "sg_aug")
 lrs=(1.0 0.1 0.01)
-n_negatives=(1 2 4 8)
+n_negatives=(1 2 4)
 
 # Iterate over all combinations of base_model and loss_func
 for base_model in "${base_models[@]}"; do
@@ -33,7 +35,7 @@ for base_model in "${base_models[@]}"; do
                 --dataset="$dataset" \
                 --recdim=128 \
                 --batch_size="$batch_size" \
-                --epochs 3
+                --epochs="$epochs"
             done
         else
             for n_negative in "${n_negatives[@]}"; do
@@ -49,7 +51,7 @@ for base_model in "${base_models[@]}"; do
                     --dataset="$dataset" \
                     --recdim=128 \
                     --batch_size="$batch_size" \
-                    --epochs 3
+                    --epochs="$epochs"
                 done
             done
         fi

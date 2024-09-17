@@ -43,7 +43,7 @@ if world.tensorboard:
         world.config["loss_func"],
         str(world.config["n_negative"]),
         str(world.config["lr"]),
-        time.strftime("%m-%d-%Hh%Mm-")
+        time.strftime("%m-%d-%Hh%Mm")
         )
     w : SummaryWriter = SummaryWriter(filename)
 else:
@@ -54,7 +54,7 @@ try:
     for epoch in range(world.TRAIN_epochs):
         start = time.time()
         if epoch % 1 == 0:
-            Procedure.test(dataset, sg_model, epoch, w)
+            Procedure.test(dataset, sg_model, world.config["test_set"], epoch, w)
         output_information = Procedure.train(dataset, 
             sg_model, 
             loss_obj, 

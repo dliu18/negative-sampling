@@ -14,8 +14,10 @@ def parse_args():
                         help="loss function to use between 'sg' or 'sg aug'")
     parser.add_argument('--base_model', type=str,default="n2v",
                         help="base model to use between 'n2v' or 'line'")
-    parser.add_argument('--reg_lam', type=float,default=0.5,
-                        help="regularization hyperparameter")
+    parser.add_argument('--test_set', type=str,default="test",
+                        help="Is either 'test' or 'valid' i.e. validation")
+    parser.add_argument('--lam', type=float,default=1.0,
+                        help="dimension regularization hyperparameter")
     parser.add_argument('--batch_size', type=int,default=128,
                         help="the batch size for bpr loss training procedure")
     parser.add_argument('--recdim', type=int,default=64,

@@ -35,7 +35,7 @@ class SGModel(BasicModel):
         super(SGModel, self).__init__()
         self.num_users  = dataset.n_users
         self.latent_dim = config['latent_dim_rec']
-        self.lam = config["reg_lam"]
+        self.lam = config["lambda"]
         self.device = world.device
         self.eps = 1e-15
         self.f = nn.Sigmoid()
@@ -61,7 +61,7 @@ class SGModel(BasicModel):
 
     def dimension_reg(self):
         col_sums = torch.sum(self.embedding_user.weight, dim=0)
-        return col_sums.norm(2).pow(2)
+        return self.lam * col_sums.norm(2).pow(2)
 
     def forward(self, src, tgt):
         src = src.long()

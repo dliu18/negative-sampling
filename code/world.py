@@ -19,7 +19,7 @@ args = parse_args()
 ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 CODE_PATH = join(ROOT_PATH, 'code')
 DATA_PATH = join(ROOT_PATH, 'data')
-BOARD_PATH = join(CODE_PATH, 'runs')
+BOARD_PATH = join(CODE_PATH, 'runs', 'scratch')
 FILE_PATH = join(CODE_PATH, 'checkpoints')
 import sys
 sys.path.append(join(CODE_PATH, 'sources'))
@@ -32,6 +32,7 @@ if not os.path.exists(FILE_PATH):
 config = {}
 
 config['base_model'] = args.base_model
+config['test_set'] = args.test_set
 config['batch_size'] = args.batch_size
 config['latent_dim_rec'] = args.recdim
 config['dropout'] = args.dropout
@@ -42,7 +43,7 @@ config['pretrain'] = args.pretrain
 config['A_split'] = False
 config['bigdata'] = False
 config["loss_func"] = args.loss_func
-config["reg_lam"] = args.reg_lam
+config["lambda"] = args.lam
 config["n_negative"] = args.n_negative
 
 GPU = torch.cuda.is_available()

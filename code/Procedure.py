@@ -68,15 +68,20 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
     return f"loss: {aver_loss:,}"
     
      
-def test(dataset, sg_model, epoch, writer):
-    test_data = dataset.get_test_data()
+def test(dataset, sg_model, test_set, epoch, writer):
+    test_data = None
+    if test_set != "test" and test_set != "valid":
+        raise NotImplementedError("The provided test set is not valid")
+    else:
+        if test_set == "test":    
+            test_data = dataset.get_test_data()
+        elif test_set == "valid":
+            test_data = dataset.get_valid_data()
 
     # test MRR
-    mrr_negatives = dataset.get_mrr_negatives()
-    label, avg_mrr = Evaluator.test_mrr(sg_model, dataset)
+    label, avg_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
     writer.add_scalar(f'metrics/{label}', avg_mrr, epoch)
 
     # test Hits@k
-    hits_negatives = dataset.get_hits_negatives()
-    label, avg_hits = Evaluator.test_hits(sg_model, dataset)
+    label, avg_hits = Evaluator.test_hits(sg_model, dataset, test_set)
     writer.add_scalar(f'metrics/{label}', avg_hits, epoch)

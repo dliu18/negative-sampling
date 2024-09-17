@@ -66,7 +66,7 @@ class SkipGramAugmentedLoss(Loss):
 
     def stageOne(self, epoch, users, pos, neg):
         pos_loss = self.model.sg_positive_loss(users, pos)
-        neg_loss = self.model.sg_negative_loss(users, neg)
+        # neg_loss = self.model.sg_negative_loss(users, neg)
         dimension_regularization = self.model.dimension_reg()
 
         assert "n_negative" in config
@@ -77,7 +77,7 @@ class SkipGramAugmentedLoss(Loss):
             pos_loss.backward()
         self.opt.step()
 
-        return pos_loss.detach().to('cpu'), neg_loss.detach().to('cpu'), dimension_regularization.detach().to('cpu')
+        return pos_loss.detach().to('cpu'), 0.0, dimension_regularization.detach().to('cpu')
         
 def UniformSample_original(dataset, neg_ratio = 1):
     dataset : BasicDataset
