@@ -1,11 +1,11 @@
 python main.py \
---base_model="line" \
---loss_func="sg" \
+--base_model="n2v" \
+--loss_func="sg_aug" \
 --n_negative=1 \
 --lr=0.01 \
 --seed=2020 \
---dataset="ogbl-collab" \
+--dataset="Cora" \
 --recdim=128 \
---batch_size=1024 \
---epochs 25 \
+--batch_size=128 \
+--epochs 10 \
 --comment="Test OGB"

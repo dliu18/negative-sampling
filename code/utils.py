@@ -13,6 +13,7 @@ from torch import log
 from dataloader import BasicDataset
 from time import time
 from model import BasicModel, SGModel
+from world import config
 from sklearn.metrics import roc_auc_score
 import random
 import os
@@ -55,7 +56,7 @@ class SkipGramLoss(Loss):
         total_loss.backward()
         self.opt.step()
 
-        return pos_loss.to('cpu'), neg_loss.to('cpu'), dimension_regularization.to('cpu')
+        return pos_loss.detach().to('cpu'), neg_loss.detach().to('cpu'), dimension_regularization.detach().to('cpu')
 
 class SkipGramAugmentedLoss(Loss):
     def __init__(self,
@@ -76,7 +77,7 @@ class SkipGramAugmentedLoss(Loss):
             pos_loss.backward()
         self.opt.step()
 
-        return pos_loss, neg_loss, dimension_regularization
+        return pos_loss.detach().to('cpu'), neg_loss.detach().to('cpu'), dimension_regularization.detach().to('cpu')
         
 def UniformSample_original(dataset, neg_ratio = 1):
     dataset : BasicDataset

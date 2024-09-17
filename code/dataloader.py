@@ -111,9 +111,9 @@ class SmallBenchmark(BasicDataset):
     def get_train_loader_rw(self, batch_size, sample_negatives):
         model = Node2Vec(to_undirected(self.train_data.edge_index, self.full_data.num_nodes), 
                     embedding_dim=128, # set as a placeholder but the embeddings in here are not used
-                     walk_length=20,
-                     context_size=10,
-                     walks_per_node = 1,
+                     walk_length=60,
+                     context_size=20,
+                     walks_per_node = 10,
                      num_negative_samples= 1 if sample_negatives else 0
                 ).to(self.device)
 
@@ -121,7 +121,7 @@ class SmallBenchmark(BasicDataset):
         return loader
 
     def _sample_edges(self, batch):
-        pos = self.train_edges[:, batch].to(self.device)
+        pos = self.train_data.edge_index[:, batch].to(self.device)
         neg = pos.clone()
 
         generator = torch.Generator(device='cpu')
@@ -172,8 +172,23 @@ class OGBBenchmark(BasicDataset):
         self.full_data = data
 
         self.split_edge = dataset.get_edge_split()
-        self.train_edges = self.split_edge['train']['edge'].t().to(device=self.device)
-        self.test_edges = self.split_edge['test']['edge'].t().to(device=self.device)
+
+        if 'edge' in self.split_edge['train']:
+            self.train_edges = self.split_edge['train']['edge'].t().to(device=self.device)
+            self.test_edges = self.split_edge['test']['edge'].t().to(device=self.device)
+        elif 'source_node' in self.split_edge['train']:
+            self.train_edges = torch.cat([
+                self.split_edge['train']['source_node'].reshape(1, -1),
+                self.split_edge['train']['target_node'].reshape(1, -1)
+                ], dim=0).to(device=self.device)
+
+            self.test_edges = torch.cat([
+                self.split_edge['test']['source_node'].reshape(1, -1),
+                self.split_edge['test']['target_node'].reshape(1, -1)
+                ], dim=0).to(device=self.device)
+        else:
+            raise NotImplementedError("OGB dataset does not have correct schema: ",
+                self.split_edge['train'].keys())
 
     @property
     def n_users(self):
@@ -190,7 +205,7 @@ class OGBBenchmark(BasicDataset):
     def get_train_loader_rw(self, batch_size, sample_negatives):
         model = Node2Vec(to_undirected(self.train_edges, self.full_data.num_nodes), 
                     embedding_dim=128, # set as a placeholder but the embeddings in here are not used
-                     walk_length=40,
+                     walk_length=60,
                      context_size=20,
                      walks_per_node = 10,
                      num_negative_samples= 1 if sample_negatives else 0
@@ -231,7 +246,7 @@ class OGBBenchmark(BasicDataset):
         else:
             generator = torch.Generator(device='cpu')
             generator.manual_seed(self.seed)
-            return torch.randint(high=self.sg_model, generator=generator, size=(2, NUM_HITS_NEGATIVES)).to(self.device)
+            return torch.randint(high=self.n_users, generator=generator, size=(2, NUM_HITS_NEGATIVES)).to(self.device)
 
 
     def get_mrr_negatives(self):

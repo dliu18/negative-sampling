@@ -25,8 +25,7 @@ CORES = multiprocessing.cpu_count() // 2
 
 
 # expects the loss to be either SkipGramAugmentedLoss or SkipGramLoss
-def train(dataset, recommend_model, loss_obj, epoch, writer=None):
-    sg_model = recommend_model
+def train(dataset, sg_model, loss_obj, epoch, writer=None):
     sg_model.train() # puts the model in training mode
     loss_obj: utils.Loss = loss_obj
 

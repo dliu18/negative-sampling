@@ -37,9 +37,15 @@ Neg_k = 1
 
 # init tensorboard
 if world.tensorboard:
-    w : SummaryWriter = SummaryWriter(
-                                    join(world.BOARD_PATH, time.strftime("%m-%d-%Hh%Mm%Ss-") + "-" + world.comment)
-                                    )
+    filename = join(world.BOARD_PATH,
+        world.dataset,
+        world.config["base_model"],
+        world.config["loss_func"],
+        str(world.config["n_negative"]),
+        str(world.config["lr"]),
+        time.strftime("%m-%d-%Hh%Mm-")
+        )
+    w : SummaryWriter = SummaryWriter(filename)
 else:
     w = None
     world.cprint("not enable tensorflowboard")
@@ -56,6 +62,7 @@ try:
             writer=w)
         print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
         torch.save(sg_model.state_dict(), weight_file)
+    Procedure.test(dataset, sg_model, world.TRAIN_epochs, w)
 finally:
     if world.tensorboard:
         w.close()
