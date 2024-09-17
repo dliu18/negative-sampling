@@ -1,11 +1,12 @@
 python main.py \
 --base_model="n2v" \
 --loss_func="sg_aug" \
---n_negative=100000000000 \
+--test_set="valid" \
+--n_negative=4 \
 --lr=0.1 \
 --lam=0.01 \
 --seed=2020 \
---dataset="CiteSeer" \
+--dataset="ogbl-citation2" \
 --recdim=128 \
 --batch_size=128 \
 --epochs 25

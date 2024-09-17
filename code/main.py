@@ -43,6 +43,7 @@ if world.tensorboard:
         world.config["loss_func"],
         str(world.config["n_negative"]),
         str(world.config["lr"]),
+        str(world.config["lambda"]),
         time.strftime("%m-%d-%Hh%Mm")
         )
     w : SummaryWriter = SummaryWriter(filename)
@@ -62,7 +63,7 @@ try:
             writer=w)
         print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
         torch.save(sg_model.state_dict(), weight_file)
-    Procedure.test(dataset, sg_model, world.TRAIN_epochs, w)
+    Procedure.test(dataset, sg_model, world.config["test_set"], world.TRAIN_epochs, w)
 finally:
     if world.tensorboard:
         w.close()
