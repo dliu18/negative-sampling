@@ -20,6 +20,8 @@ ROOT_PATH = os.path.dirname(os.path.dirname(__file__))
 CODE_PATH = join(ROOT_PATH, 'code')
 DATA_PATH = join(ROOT_PATH, 'data')
 BOARD_PATH = join(CODE_PATH, 'runs')
+if len(args.board_path) > 0:
+	BOARD_PATH = join(BOARD_PATH, args.board_path)
 FILE_PATH = join(CODE_PATH, 'checkpoints')
 import sys
 sys.path.append(join(CODE_PATH, 'sources'))

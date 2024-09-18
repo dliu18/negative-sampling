@@ -1,12 +1,12 @@
 python main.py \
 --base_model="n2v" \
---loss_func="sg_aug" \
+--loss_func="sg" \
 --test_set="valid" \
 --n_negative=4 \
 --lr=0.1 \
 --lam=0.01 \
 --seed=2020 \
---dataset="ogbl-citation2" \
+--dataset="ogbl-collab" \
 --recdim=128 \
---batch_size=128 \
+--batch_size=1024 \
 --epochs 25

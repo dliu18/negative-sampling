@@ -19,6 +19,8 @@ def get_last_metric_values_and_duration(event_file):
         scalar_events = event_accumulator.Scalars(tag)
         if scalar_events:
             last_values[tag] = scalar_events[-1].value
+            if "metrics" in tag:
+                last_values[tag] = max([event.value for event in scalar_events])
             final_steps[tag] = scalar_events[-1].step
             # print(scalar_events)
             # Collect timestamps for duration calculation
@@ -48,13 +50,14 @@ def create_csv_summary(log_directory, output_csv):
     rows = []
 
     for event_file in tqdm(event_files):
-        graph_name, base_model, loss_func, n_negative, lr = event_file.split('/')[1:6]
+        graph_name, base_model, loss_func, n_negative, lr, lam = event_file.split('/')[1:7]
         trial_info = {
             "Graph": graph_name,
             "Model": base_model,
             "Loss Function": loss_func,
             "n_negative": n_negative,
-            "Learning Rate": lr
+            "Learning Rate": lr,
+            'lambda': lam
         }
         last_values, duration, mrr_final_step = get_last_metric_values_and_duration(event_file)
         length = {'Duration': duration, 'Steps': mrr_final_step}
@@ -77,6 +80,6 @@ def create_csv_summary(log_directory, output_csv):
                 writer.writerow(row)
 
 if __name__ == '__main__':
-    log_directory = 'runs'  # Replace with your log directory
+    log_directory = 'runs/hyperparam'  # Replace with your log directory
     output_csv = 'summary.csv'  # Replace with your desired output CSV file name
     create_csv_summary(log_directory, output_csv)

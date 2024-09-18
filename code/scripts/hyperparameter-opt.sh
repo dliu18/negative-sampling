@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Define the values for base_model and loss_func
+#./hyperparameter-opt.sh dataset epochs batch_size_line name
 dataset="$1"
 epochs="$2"
 
@@ -15,9 +16,9 @@ for base_model in "${base_models[@]}"; do
     for loss_func in "${loss_funcs[@]}"; do
         # Set batch_size based on the base_model
         if [ "$base_model" == "n2v" ]; then
-            batch_size=128
+            batch_size="$3"
         elif [ "$base_model" == "line" ]; then
-            batch_size=1
+            batch_size="$4"
         else
             echo "Unknown base_model: $base_model"
             continue
@@ -25,22 +26,19 @@ for base_model in "${base_models[@]}"; do
 
         if [ "$loss_func" == "sg" ]; then
             for lr in "${lrs[@]}"; do
-                for lam in "${lams[@]}"; do
-                    # Execute the command with the current combination of base_model and loss_func
-                    echo "Model: $base_model \t Loss: $loss_func \t LR: $lr lam: $lam \t n_negative: 1"
-                    python main.py \
-                    --base_model="$base_model" \
-                    --loss_func="$loss_func" \
-                    --test_set="valid" \
-                    --n_negative=1 \
-                    --lr="$lr" \
-                    --lam="$lam" \
-                    --seed=2020 \
-                    --dataset="$dataset" \
-                    --recdim=128 \
-                    --batch_size="$batch_size" \
-                    --epochs="$epochs"
-                done
+                # Execute the command with the current combination of base_model and loss_func
+                echo "Model: $base_model \t Loss: $loss_func \t LR: $lr lam: $lam \t n_negative: 1"
+                python main.py \
+                --base_model="$base_model" \
+                --loss_func="$loss_func" \
+                --test_set="valid" \
+                --lr="$lr" \
+                --seed=2020 \
+                --dataset="$dataset" \
+                --recdim=128 \
+                --batch_size="$batch_size" \
+                --epochs="$epochs"\
+                --board_path="$5"
             done
         else
             for n_negative in "${n_negatives[@]}"; do
@@ -59,7 +57,8 @@ for base_model in "${base_models[@]}"; do
                         --dataset="$dataset" \
                         --recdim=128 \
                         --batch_size="$batch_size" \
-                        --epochs="$epochs"
+                        --epochs="$epochs"\
+                        --board_path="$5"
                     done
                 done
             done
