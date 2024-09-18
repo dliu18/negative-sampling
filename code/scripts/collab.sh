@@ -1,49 +1,73 @@
 #!/bin/bash
 
-python ../main.py \
+python main.py \
 --base_model="n2v" \
---loss_func="$sg" \
+--loss_func="sg" \
 --test_set="test" \
---lr="$lr" \
---lam="$lam" \
+--lr=0.01 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
---batch_size=128 \
---epochs=50
+--batch_size=1024 \
+--epochs=10
 
-python ../main.py \
+python main.py \
 --base_model="n2v" \
---loss_func="$sg_aug" \
+--loss_func="sg_aug" \
 --test_set="test" \
---n_negative="$n_negative" \
---lr="$lr" \
---lam="$lam" \
+--n_negative=2 \
+--lr=0.1 \
+--lam=0.01 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
---batch_size=128 \
---epochs=50
+--batch_size=1024 \
+--epochs=10
 
-python ../main.py \
+python main.py \
+--base_model="n2v" \
+--loss_func="sg_aug" \
+--test_set="test" \
+--n_negative=1000 \
+--lr=0.1 \
+--lam=0.01 \
+--seed=2020 \
+--dataset="ogbl-collab" \
+--recdim=128 \
+--batch_size=1024 \
+--epochs=10
+
+python main.py \
 --base_model="line" \
---loss_func="$sg" \
+--loss_func="sg" \
 --test_set="test" \
---lr="$lr" \
---lam="$lam" \
+--lr=0.1 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
 --batch_size=32 \
 --epochs=10
 
-python ../main.py \
+python main.py \
 --base_model="line" \
---loss_func="$sg_aug" \
+--loss_func="sg_aug" \
 --test_set="test" \
---n_negative="$n_negative" \
---lr="$lr" \
---lam="$lam" \
+--n_negative=2 \
+--lr=0.01 \
+--lam=0.01 \
+--seed=2020 \
+--dataset="ogbl-collab" \
+--recdim=128 \
+--batch_size=32 \
+--epochs=10
+
+python main.py \
+--base_model="line" \
+--loss_func="sg_aug" \
+--test_set="test" \
+--n_negative=1000 \
+--lr=0.01 \
+--lam=0.01 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \

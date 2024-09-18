@@ -50,7 +50,7 @@ def create_csv_summary(log_directory, output_csv):
     rows = []
 
     for event_file in tqdm(event_files):
-        graph_name, base_model, loss_func, n_negative, lr, lam = event_file.split('/')[1:7]
+        graph_name, base_model, loss_func, n_negative, lr, lam = event_file.split('/')[2:8]
         trial_info = {
             "Graph": graph_name,
             "Model": base_model,

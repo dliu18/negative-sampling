@@ -1,5 +1,5 @@
 #!/bin/bash
 
-./cora.sh
-./citeseer.sh
-./PubMed.sh
+./scripts/cora.sh
+./scripts/citeseer.sh
+./scripts/PubMed.sh
