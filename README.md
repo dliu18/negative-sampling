@@ -12,7 +12,7 @@ The script `code/scripts/hyperparameter-opt.sh` performs a grid search over hype
 ./scripts/hyperparameter-opt.sh dataset epochs batch_size_n2v batch_size_line board_path
 ```
 
-After the script runs, the results can be exported using `python summary.py`. Note: this script requires tensorflow. 
+fter the script runs, the results can be exported using `python summary.py`. Note: this script requires tensorflow. 
 
 ### Final testing
 Each network has its own execution script in `scripts/`. Configure the optimal hyperparameters before executing.
