@@ -47,8 +47,14 @@ class SkipGramLoss(Loss):
         super(SkipGramLoss, self).__init__(sg_model, config)
 
     def stageOne(self, epoch, users, pos, neg):
-        pos_loss = self.model.sg_positive_loss(users, pos)
-        neg_loss = self.model.sg_negative_loss(users, neg)
+        assert len(pos) % len(users) == 0
+        assert len(neg) % len(users) == 0
+
+        pos_users = users.repeat_interleave(int(len(pos) / len(users)))
+        pos_loss = self.model.sg_positive_loss(pos_users, pos)
+
+        neg_users = users.repeat_interleave(int(len(neg) / len(users)))
+        neg_loss = self.model.sg_negative_loss(neg_users, neg)
         dimension_regularization = self.model.dimension_reg()
         total_loss = pos_loss + neg_loss
 
@@ -65,7 +71,10 @@ class SkipGramAugmentedLoss(Loss):
         super(SkipGramAugmentedLoss, self).__init__(sg_model, config)
 
     def stageOne(self, epoch, users, pos, neg):
-        pos_loss = self.model.sg_positive_loss(users, pos)
+        assert len(pos) % len(users) == 0
+
+        pos_users = users.repeat_interleave(int(len(pos) / len(users)))
+        pos_loss = self.model.sg_positive_loss(pos_users, pos)
         # neg_loss = self.model.sg_negative_loss(users, neg)
         dimension_regularization = self.model.dimension_reg()
 

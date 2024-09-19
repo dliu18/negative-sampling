@@ -80,6 +80,6 @@ def create_csv_summary(log_directory, output_csv):
                 writer.writerow(row)
 
 if __name__ == '__main__':
-    log_directory = 'runs/hyperparam'  # Replace with your log directory
+    log_directory = 'runs/9-17'  # Replace with your log directory
     output_csv = 'summary.csv'  # Replace with your desired output CSV file name
     create_csv_summary(log_directory, output_csv)

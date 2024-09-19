@@ -7,8 +7,8 @@ from torch.utils.data import Dataset, DataLoader
 import world
 from time import time
 
-from torch_geometric.datasets import Planetoid
-from torch_geometric.utils import to_undirected
+from torch_geometric.datasets import Planetoid, 
+from torch_geometric.utils import to_undirected, degree
 from torch_geometric.transforms import RandomLinkSplit
 from torch_geometric.nn import Node2Vec
 
@@ -77,6 +77,9 @@ class BasicDataset(Dataset):
             return self.get_valid_data()
         else:
             raise NotImplementedError
+
+    def get_sg_negatives(self, shape, alpha=0.75):
+        raise NotImplementedError
             
     def get_hits_negatives(self, test_set="test"): 
         '''
@@ -103,11 +106,17 @@ class SmallBenchmark(BasicDataset):
     def __init__(self, name, seed):
         super().__init__(name, seed)
 
-        assert name in ["Cora", "CiteSeer", "PubMed"]
-        dataset = Planetoid(
-            root = "dataset/",
-            name = name,
-        )
+        assert name in ["Cora", "CiteSeer", "PubMed"] or "SBM" in name
+
+        dataset = None
+        if name in ["Cora", "CiteSeer", "PubMed"]:
+            dataset = Planetoid(
+                root = "dataset/",
+                name = name,
+            )
+        elif "SBM" in name:
+            return
+
         data = dataset[0]
         self.full_data = data
 
@@ -122,6 +131,8 @@ class SmallBenchmark(BasicDataset):
         self.train_data = train_data
         self.valid_data = valid_data
         self.test_data = test_data
+
+        self.degrees = degree(train_data.edge_index[0]).to(self.device)
 
         generator = torch.Generator(device='cpu')
         generator.manual_seed(self.seed)
@@ -144,7 +155,7 @@ class SmallBenchmark(BasicDataset):
         return self.test_data.num_edges
 
     def get_train_loader_rw(self, batch_size, sample_negatives):
-        model = Node2Vec(to_undirected(self.train_data.edge_index, self.full_data.num_nodes), 
+        model = Node2Vec(self.train_data.edge_index, 
                     embedding_dim=128, # set as a placeholder but the embeddings in here are not used
                      walk_length=60,
                      context_size=20,
@@ -179,6 +190,14 @@ class SmallBenchmark(BasicDataset):
         Returns the full test edge set in COO format. Values are node indices. Shape should be (2, num_test)
         '''
         return self.test_data.edge_index.to(self.device)
+
+    def get_sg_negatives(self, shape, alpha=0.75):
+        weights = self.degree.pow(alpha)
+        num_samples = 1
+        for dim in shape:
+            num_samples *= dim
+        negatives = torch.multinomial(weights, num_samples = negatives, replacement=True).to(self.device)
+        return negatives.reshape(shape)
 
     def get_hits_negatives(self, test_set="test"):
         '''
@@ -231,6 +250,7 @@ class OGBBenchmark(BasicDataset):
             raise NotImplementedError("OGB dataset does not have correct schema: ",
                 self.split_edge['train'].keys())
 
+        self.degrees = degree(self.train_edges.reshape(-1)).to(self.device)
         generator = torch.Generator(device='cpu')
         generator.manual_seed(self.seed)
         self.generator = generator
@@ -252,7 +272,11 @@ class OGBBenchmark(BasicDataset):
         return self.test_edges.size(1)
 
     def get_train_loader_rw(self, batch_size, sample_negatives):
-        model = Node2Vec(to_undirected(self.train_edges, self.full_data.num_nodes), 
+        edges = self.train_edges
+        #if the graph is undirected we need to add in the bidirectional edges since OGB does not include them in split_edge
+        if self.full_data.is_undirected();
+            edges = to_undirected(self.train_edges, self.full_data.num_nodes)
+        model = Node2Vec(edges, 
                     embedding_dim=128, # set as a placeholder but the embeddings in here are not used
                      walk_length=40,
                      context_size=20,
@@ -287,6 +311,15 @@ class OGBBenchmark(BasicDataset):
         Returns the full test edge set in COO format. Values are node indices. Shape should be (2, num_test)
         '''
         return self.test_edges.to(self.device)
+
+    def get_sg_negatives(self, shape, alpha=0.75):
+        weights = self.degree.pow(alpha)
+        num_samples = 1
+        for dim in shape:
+            num_samples *= dim
+        negatives = torch.multinomial(weights, num_samples = negatives, replacement=True).to(self.device)
+        return negatives.reshape(shape)
+
 
     def get_hits_negatives(self, test_set="test"):
         '''

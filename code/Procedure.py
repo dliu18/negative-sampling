@@ -44,14 +44,13 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
     aver_loss = 0.
     batch_i = 0
 
-    for pos_sample, neg_sample in tqdm(loader):
+    for pos_sample, _ in tqdm(loader):
         # each row of pos and neg samples is of the form [src, dst1, dst2, ...]
         batch_pos = pos_sample[:, 1:].reshape(-1).to('cuda')
-        batch_neg = neg_sample[:, 1:].reshape(-1).to('cuda')
-        num_targets = pos_sample.shape[1]
-        batch_users = pos_sample[:, 0].reshape(-1).repeat_interleave(num_targets - 1).to('cuda')
-        assert len(batch_users) == len(batch_pos)
-        assert len(batch_users) == len(batch_neg)
+        batch_neg = dataset.get_sg_negatives(
+            shape = world.config["K"] * batch_pos.shape,
+            alpha = world.config["alpha"]).to('cuda')
+        batch_users = pos_sample[:, 0].reshape(-1).to('cuda')
 
         pos_loss, neg_loss, dimension_regularization = loss_obj.stageOne(epoch, 
             batch_users, 

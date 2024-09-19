@@ -24,6 +24,10 @@ def parse_args():
                         help="the embedding size of lightGCN")
     parser.add_argument('--lr', type=float,default=0.001,
                         help="the learning rate")
+    parser.add_argument('--alpha', type=float,default=0.75,
+                        help="Multinomial exponent for skip gram negative samples")
+    parser.add_argument('--K', type=int,default=1,
+                        help="The number of negative samples per positive sample")
     parser.add_argument('--dropout', type=int,default=0,
                         help="using the dropout or not")
     parser.add_argument('--testbatch', type=int,default=100,
