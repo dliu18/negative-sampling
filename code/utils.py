@@ -37,7 +37,7 @@ class Loss:
         self.lr = config['lr']
         self.opt = optim.Adam(sg_model.parameters(), lr=self.lr)
     
-    def stageOne(self, epoch, users, pos, neg):
+    def stageOne(self, epoch, batch_num, users, pos, neg):
         raise NotImplementedError
 
 class SkipGramLoss(Loss):
@@ -46,7 +46,7 @@ class SkipGramLoss(Loss):
                  config: dict):
         super(SkipGramLoss, self).__init__(sg_model, config)
 
-    def stageOne(self, epoch, users, pos, neg):
+    def stageOne(self, epoch, batch_num, users, pos, neg):
         assert len(pos) % len(users) == 0
         assert len(neg) % len(users) == 0
 
@@ -70,7 +70,7 @@ class SkipGramAugmentedLoss(Loss):
                  config: dict):
         super(SkipGramAugmentedLoss, self).__init__(sg_model, config)
 
-    def stageOne(self, epoch, users, pos, neg):
+    def stageOne(self, epoch, batch_num, users, pos, neg):
         assert len(pos) % len(users) == 0
 
         pos_users = users.repeat_interleave(int(len(pos) / len(users)))
@@ -80,13 +80,16 @@ class SkipGramAugmentedLoss(Loss):
 
         assert "n_negative" in config
         self.opt.zero_grad()
-        if epoch % config['n_negative'] == 0:
+        # if epoch % config['n_negative'] == 0 and batch_num == 0:
+        if batch_num % config['n_negative'] == 0 and batch_num > 0:
             dimension_regularization.backward()
         else:
             pos_loss.backward()
         self.opt.step()
 
-        return pos_loss.detach().to('cpu'), 0.0, dimension_regularization.detach().to('cpu')
+        return pos_loss.detach().to('cpu'), \
+                0.0, \
+                dimension_regularization.detach().to('cpu') / config["lambda"]
         
 def UniformSample_original(dataset, neg_ratio = 1):
     dataset : BasicDataset

@@ -7,7 +7,7 @@ from torch.utils.data import Dataset, DataLoader
 import world
 from time import time
 
-from torch_geometric.datasets import Planetoid, 
+from torch_geometric.datasets import Planetoid, StochasticBlockModelDataset
 from torch_geometric.utils import to_undirected, degree
 from torch_geometric.transforms import RandomLinkSplit
 from torch_geometric.nn import Node2Vec
@@ -128,11 +128,20 @@ class SmallBenchmark(BasicDataset):
 
         train_data, valid_data, test_data = split(data)
 
-        self.train_data = train_data
-        self.valid_data = valid_data
-        self.test_data = test_data
+        self.train_edges = train_data.edge_label_index[:, train_data.edge_label == 1]
+        self.valid_edges = valid_data.edge_label_index[:, valid_data.edge_label == 1]
+        self.test_edges = test_data.edge_label_index[:, test_data.edge_label == 1]
 
-        self.degrees = degree(train_data.edge_index[0]).to(self.device)
+        if data.is_undirected():
+            self.train_edges = to_undirected(self.train_edges)
+            self.valid_edges = to_undirected(self.valid_edges)
+            self.test_edges = to_undirected(self.test_edges)
+
+        reconstructed =  torch.cat([self.train_edges, self.valid_edges, self.test_edges], dim=1)
+        assert reconstructed.shape == data.edge_index.shape
+        assert (reconstructed.sum(dim=1) == data.edge_index.sum(dim=1)).all()
+
+        self.degrees = degree(self.train_edges[0]).to(self.device)
 
         generator = torch.Generator(device='cpu')
         generator.manual_seed(self.seed)
@@ -144,18 +153,18 @@ class SmallBenchmark(BasicDataset):
 
     @property
     def n_train_edges(self):
-        return self.train_data.num_edges
+        return self.train_edges.size(1)
 
     @property
     def n_valid_edges(self):
-        return self.valid_data.num_edges
+        return self.valid_edges.size(1)
 
     @property
     def n_test_edges(self):
-        return self.test_data.num_edges
+        return self.test_edges.size(1)
 
     def get_train_loader_rw(self, batch_size, sample_negatives):
-        model = Node2Vec(self.train_data.edge_index, 
+        model = Node2Vec(self.train_edges, 
                     embedding_dim=128, # set as a placeholder but the embeddings in here are not used
                      walk_length=60,
                      context_size=20,
@@ -167,7 +176,7 @@ class SmallBenchmark(BasicDataset):
         return loader
 
     def _sample_edges(self, batch):
-        pos = self.train_data.edge_index[:, batch].to(self.device)
+        pos = self.train_edges[:, batch].to(self.device)
         neg = pos.clone()
 
         neg[1] = torch.randint(high=self.n_users, generator=self.generator, size=(neg.size(1),)).to(self.device)
@@ -183,20 +192,20 @@ class SmallBenchmark(BasicDataset):
         '''
         Returns the full validation edge set in COO format. Values are node indices. Shape should be (2, num_valid)
         '''
-        return self.valid_data.edge_index.to(self.device)
+        return self.valid_edges.to(self.device)
 
     def get_test_data(self):
         '''
         Returns the full test edge set in COO format. Values are node indices. Shape should be (2, num_test)
         '''
-        return self.test_data.edge_index.to(self.device)
+        return self.test_edges.to(self.device)
 
     def get_sg_negatives(self, shape, alpha=0.75):
-        weights = self.degree.pow(alpha)
+        weights = self.degrees.pow(alpha)
         num_samples = 1
         for dim in shape:
             num_samples *= dim
-        negatives = torch.multinomial(weights, num_samples = negatives, replacement=True).to(self.device)
+        negatives = torch.multinomial(weights, num_samples = num_samples, replacement=True).to(self.device)
         return negatives.reshape(shape)
 
     def get_hits_negatives(self, test_set="test"):
@@ -274,7 +283,7 @@ class OGBBenchmark(BasicDataset):
     def get_train_loader_rw(self, batch_size, sample_negatives):
         edges = self.train_edges
         #if the graph is undirected we need to add in the bidirectional edges since OGB does not include them in split_edge
-        if self.full_data.is_undirected();
+        if self.full_data.is_undirected():
             edges = to_undirected(self.train_edges, self.full_data.num_nodes)
         model = Node2Vec(edges, 
                     embedding_dim=128, # set as a placeholder but the embeddings in here are not used
@@ -313,11 +322,11 @@ class OGBBenchmark(BasicDataset):
         return self.test_edges.to(self.device)
 
     def get_sg_negatives(self, shape, alpha=0.75):
-        weights = self.degree.pow(alpha)
+        weights = self.degrees.pow(alpha)
         num_samples = 1
         for dim in shape:
             num_samples *= dim
-        negatives = torch.multinomial(weights, num_samples = negatives, replacement=True).to(self.device)
+        negatives = torch.multinomial(weights, num_samples = num_samples, replacement=True).to(self.device)
         return negatives.reshape(shape)
 
 
@@ -342,3 +351,33 @@ class OGBBenchmark(BasicDataset):
         else:
             return torch.randint(high=self.n_users, generator=self.generator, size=(len(edge_idxs), NUM_MRR_NEGATIVES)).to(self.device)
 
+if __name__ == "__main__": 
+    for name in ["Cora", "CiteSeer", "PubMed"]:
+        dataset = SmallBenchmark(name, seed = 2020)
+        print(
+            name, 
+            "\n Nodes: ",
+            dataset.n_users,
+            "\n Train edges: ",
+            dataset.n_train_edges,
+            "\n Validation edges: ",
+            dataset.n_valid_edges,
+            "\n Test edges: ",
+            dataset.n_test_edges,
+            "\n"
+        )
+
+    for name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]:
+        dataset = OGBBenchmark(name, seed = 2020)
+        print(
+            name, 
+            "\n Nodes: ",
+            dataset.n_users,
+            "\n Train edges: ",
+            dataset.n_train_edges,
+            "\n Validation edges: ",
+            dataset.n_valid_edges,
+            "\n Test edges: ",
+            dataset.n_test_edges,
+            "\n"
+        )

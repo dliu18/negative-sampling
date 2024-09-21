@@ -3,6 +3,7 @@ import csv
 import tensorflow as tf
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from tqdm import tqdm 
+from sys import argv
 
 def get_last_metric_values_and_duration(event_file):
     event_accumulator = EventAccumulator(event_file)
@@ -80,6 +81,9 @@ def create_csv_summary(log_directory, output_csv):
                 writer.writerow(row)
 
 if __name__ == '__main__':
-    log_directory = 'runs/9-17'  # Replace with your log directory
-    output_csv = 'summary.csv'  # Replace with your desired output CSV file name
+    assert len(argv) >= 2
+    dir_name = argv[1]
+    print(dir_name)
+    log_directory = 'runs/' +  dir_name # Replace with your log directory
+    output_csv = f'summary-{dir_name}.csv'  # Replace with your desired output CSV file name
     create_csv_summary(log_directory, output_csv)

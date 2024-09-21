@@ -37,20 +37,26 @@ class Evaluator:
 			pessimistic_rank = (y_neg >= y_pos).sum(dim=1)
 			ranking_list = 0.5 * (optimistic_rank + pessimistic_rank) + 1
 			mrr_list = 1./ranking_list.to(torch.float)
-			return mrr_list.mean()
+			return mrr_list.reshape((1, -1))
+			# return mrr_list.mean()
 
 		sg_model.eval()
 
 		eval_edges = dataset.get_eval_data(test_set)
 		y_neg = _get_negative_scores(sg_model, dataset, test_set)
 		total_mrr = 0.
+		all_mrr = []
 		for eval_batch in DataLoader(range(eval_edges.size(1)), EVAL_BATCH_SIZE, shuffle = False):
 			eval_batch_edges = eval_edges[:, eval_batch]
 			y_pos = sg_model(eval_batch_edges[0], eval_batch_edges[1])
-			total_mrr += len(eval_batch) * _get_mrr(y_pos, y_neg[eval_batch])
-		avg_mrr = total_mrr / eval_edges.size(1)
-		print(f'MRR: {avg_mrr:.4f}')
-		return "MRR", avg_mrr
+			# total_mrr += len(eval_batch) * _get_mrr(y_pos, y_neg[eval_batch])
+			all_mrr.append(_get_mrr(y_pos, y_neg[eval_batch]))
+		# avg_mrr = total_mrr / eval_edges.size(1)
+		# print(f'MRR: {avg_mrr:.4f}')
+		# return "MRR", avg_mrr
+		all_mrr = torch.cat(all_mrr, dim=1)
+		print(f'MRR: {all_mrr.mean():.4f}')
+		return "MRR", all_mrr
 
 	@staticmethod
 	@torch.no_grad()
@@ -63,7 +69,8 @@ class Evaluator:
 
 		def _get_hits(y_pos, y_neg, K):
 			threshold = torch.topk(y_neg, K).values[-1]
-			return torch.sum(y_pos > threshold) / len(y_pos)
+			return (y_pos > threshold).float().reshape((1, -1))
+			# return torch.sum(y_pos > threshold) / len(y_pos)
 
 		sg_model.eval()
 		eval_edges = dataset.get_eval_data(test_set)
@@ -73,6 +80,7 @@ class Evaluator:
 
 		y_neg = _get_negative_scores(sg_model, negatives_for_hits)
 		total_hits = 0.
+		all_hits = []
 		for eval_batch in DataLoader(range(eval_edges.size(1)), EVAL_BATCH_SIZE, shuffle = False):
 			# print(test_batch)
 			eval_batch_edges = eval_edges[:, eval_batch]
@@ -82,8 +90,12 @@ class Evaluator:
 			)
 			hits_batch = _get_hits(y_pos, y_neg, K)
 
-			total_hits += hits_batch * eval_batch.size(0)
+			# total_hits += hits_batch * eval_batch.size(0)
+			all_hits.append(hits_batch)
 
-		avg_hits = total_hits / eval_edges.size(1)
-		print(f'Hits@{K}: {avg_hits:.4f}')
-		return f'Hits@{K}', avg_hits
+		all_hits = torch.cat(all_hits, dim=1)
+		# avg_hits = total_hits / eval_edges.size(1)
+		# print(f'Hits@{K}: {avg_hits:.4f}')
+		# return f'Hits@{K}', avg_hits
+		print(f'Hits@{K}: {all_hits.mean():.4f}')
+		return f'Hits@{K}', all_hits

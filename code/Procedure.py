@@ -48,11 +48,12 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
         # each row of pos and neg samples is of the form [src, dst1, dst2, ...]
         batch_pos = pos_sample[:, 1:].reshape(-1).to('cuda')
         batch_neg = dataset.get_sg_negatives(
-            shape = world.config["K"] * batch_pos.shape,
+            shape = (world.config["K"] * len(batch_pos),),
             alpha = world.config["alpha"]).to('cuda')
         batch_users = pos_sample[:, 0].reshape(-1).to('cuda')
 
-        pos_loss, neg_loss, dimension_regularization = loss_obj.stageOne(epoch, 
+        pos_loss, neg_loss, dimension_regularization = loss_obj.stageOne(epoch,
+            batch_i, 
             batch_users, 
             batch_pos, 
             batch_neg)
@@ -78,9 +79,11 @@ def test(dataset, sg_model, test_set, epoch, writer):
             test_data = dataset.get_valid_data()
 
     # test MRR
-    label, avg_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
-    writer.add_scalar(f'metrics/{label}', avg_mrr, epoch)
+    label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
+    if writer:
+        writer.add_scalar(f'metrics/{label}', all_mrr.mean(), epoch)
 
     # test Hits@k
-    label, avg_hits = Evaluator.test_hits(sg_model, dataset, test_set)
-    writer.add_scalar(f'metrics/{label}', avg_hits, epoch)
+    label, all_hits = Evaluator.test_hits(sg_model, dataset, test_set)
+    if writer:
+        writer.add_scalar(f'metrics/{label}', all_hits.mean(), epoch)

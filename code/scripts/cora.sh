@@ -13,6 +13,20 @@ python main.py \
 
 python main.py \
 --base_model="n2v" \
+--loss_func="sg" \
+--test_set="test" \
+--n_negative=-1 \
+--lr=0.1 \
+--K=5 \
+--alpha=0.75 \
+--seed=2020 \
+--dataset="Cora" \
+--recdim=128 \
+--batch_size=128 \
+--epochs=50
+
+python main.py \
+--base_model="n2v" \
 --loss_func="sg_aug" \
 --test_set="test" \
 --n_negative=2 \
@@ -42,6 +56,20 @@ python main.py \
 --loss_func="sg" \
 --test_set="test" \
 --lr=0.1 \
+--seed=2020 \
+--dataset="Cora" \
+--recdim=128 \
+--batch_size=1 \
+--epochs=50
+
+python main.py \
+--base_model="line" \
+--loss_func="sg" \
+--test_set="test" \
+--n_negative=-1 \
+--lr=0.1 \
+--K=5 \
+--alpha=0.75 \
 --seed=2020 \
 --dataset="Cora" \
 --recdim=128 \

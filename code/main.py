@@ -52,7 +52,7 @@ else:
     world.cprint("not enable tensorflowboard")
 
 try:
-    for epoch in range(world.TRAIN_epochs):
+    for epoch in range(1, world.TRAIN_epochs + 1):
         start = time.time()
         if epoch % 1 == 0:
             Procedure.test(dataset, sg_model, world.config["test_set"], epoch, w)
@@ -63,7 +63,7 @@ try:
             writer=w)
         print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
         torch.save(sg_model.state_dict(), weight_file)
-    Procedure.test(dataset, sg_model, world.config["test_set"], world.TRAIN_epochs, w)
+    Procedure.test(dataset, sg_model, world.config["test_set"], world.TRAIN_epochs + 1, w)
 finally:
     if world.tensorboard:
         w.close()

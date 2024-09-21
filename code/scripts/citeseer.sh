@@ -13,6 +13,20 @@ python main.py \
 
 python main.py \
 --base_model="n2v" \
+--loss_func="sg" \
+--test_set="test" \
+--n_negative=-1 \
+--alpha=0.75 \
+--K=5 \
+--lr=0.1 \
+--seed=2020 \
+--dataset="CiteSeer" \
+--recdim=128 \
+--batch_size=128 \
+--epochs=50
+
+python main.py \
+--base_model="n2v" \
 --loss_func="sg_aug" \
 --test_set="test" \
 --n_negative=2 \
@@ -47,6 +61,20 @@ python main.py \
 --recdim=128 \
 --batch_size=1 \
 --epochs=50
+
+python main.py \
+--base_model="line" \
+--loss_func="sg" \
+--test_set="test" \
+--lr=0.1 \
+--seed=2020 \
+--dataset="CiteSeer" \
+--recdim=128 \
+--batch_size=1 \
+--epochs=50 \
+--n_negative=-1 \
+--alpha=0.75 \
+--K=5
 
 python main.py \
 --base_model="line" \
