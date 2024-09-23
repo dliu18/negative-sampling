@@ -1,11 +1,38 @@
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from dataloader import BasicDataset
 from model import BasicModel
+from sklearn.metrics import roc_auc_score 
 
 EVAL_BATCH_SIZE = 128
 
 class Evaluator:
+	@staticmethod
+	@torch.no_grad()
+	def test_auc(sg_model, dataset, test_set):
+		sg_model.eval()
+		eval_edges_pos = dataset.get_eval_data(test_set)
+		eval_edges_neg = dataset.get_roc_negatives(test_set)
+		assert eval_edges_pos.size() == eval_edges_neg.size()
+
+		eval_edges = torch.cat([eval_edges_pos, eval_edges_neg], dim = 1)
+		
+		num_pos = eval_edges_pos.size(1)
+		eval_labels = num_pos * [1]
+		eval_labels.extend(num_pos * [0])
+		eval_labels = np.array(eval_labels)
+
+		aucs = []
+		for src_idxs in DataLoader(range(eval_edges.size(1)), 2 * EVAL_BATCH_SIZE, shuffle = True):
+			scores = sg_model(eval_edges[0][src_idxs], eval_edges[1][src_idxs]).cpu()
+			aucs.append(roc_auc_score(
+				y_score = scores, 
+				y_true = eval_labels[src_idxs.cpu()]))
+		avg_auc = np.mean(aucs)
+		print(f'AUC: {avg_auc:.4f}')
+		return "AUC ROC", avg_auc
+
 	@staticmethod
 	@torch.no_grad()
 	def test_mrr(sg_model, dataset, test_set):

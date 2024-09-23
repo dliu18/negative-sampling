@@ -48,6 +48,9 @@ class BasicDataset(Dataset):
     def n_test_edges(self):
         raise NotImplementedError
 
+    def get_degrees(self):
+        raise NotImplementedError
+
     def get_train_loader_rw(self, batch_size, sample_negatives):
         # batches of edges
         raise NotImplementedError
@@ -77,6 +80,9 @@ class BasicDataset(Dataset):
             return self.get_valid_data()
         else:
             raise NotImplementedError
+
+    def get_roc_negatives(self):
+        raise NotImplementedError
 
     def get_sg_negatives(self, shape, alpha=0.75):
         raise NotImplementedError
@@ -115,7 +121,15 @@ class SmallBenchmark(BasicDataset):
                 name = name,
             )
         elif "SBM" in name:
-            return
+            _, p, q = name.split("-")
+            p = float(p)
+            q = float(q)
+            B = q * torch.ones(2, 2) + (p - q) * torch.eye(2)
+            dataset = StochasticBlockModelDataset(
+                root = "dataset/",
+                block_sizes = torch.tensor([1000, 1000]),
+                edge_probs = B,
+                is_undirected = True)
 
         data = dataset[0]
         self.full_data = data
@@ -130,18 +144,22 @@ class SmallBenchmark(BasicDataset):
 
         self.train_edges = train_data.edge_label_index[:, train_data.edge_label == 1]
         self.valid_edges = valid_data.edge_label_index[:, valid_data.edge_label == 1]
+        self.valid_edges_neg = valid_data.edge_label_index[:, valid_data.edge_label == 0]
         self.test_edges = test_data.edge_label_index[:, test_data.edge_label == 1]
+        self.test_edges_neg = test_data.edge_label_index[:, test_data.edge_label == 0]
 
         if data.is_undirected():
             self.train_edges = to_undirected(self.train_edges)
             self.valid_edges = to_undirected(self.valid_edges)
+            self.valid_edges_neg = to_undirected(self.valid_edges_neg)
             self.test_edges = to_undirected(self.test_edges)
+            self.test_edges_neg = to_undirected(self.test_edges_neg)
 
         reconstructed =  torch.cat([self.train_edges, self.valid_edges, self.test_edges], dim=1)
         assert reconstructed.shape == data.edge_index.shape
         assert (reconstructed.sum(dim=1) == data.edge_index.sum(dim=1)).all()
 
-        self.degrees = degree(self.train_edges[0]).to(self.device)
+        self.degrees = degree(self.train_edges[0], num_nodes=data.num_nodes).to(self.device)
 
         generator = torch.Generator(device='cpu')
         generator.manual_seed(self.seed)
@@ -162,6 +180,9 @@ class SmallBenchmark(BasicDataset):
     @property
     def n_test_edges(self):
         return self.test_edges.size(1)
+
+    def get_degrees(self):
+        return self.degrees
 
     def get_train_loader_rw(self, batch_size, sample_negatives):
         model = Node2Vec(self.train_edges, 
@@ -199,6 +220,13 @@ class SmallBenchmark(BasicDataset):
         Returns the full test edge set in COO format. Values are node indices. Shape should be (2, num_test)
         '''
         return self.test_edges.to(self.device)
+
+    def get_roc_negatives(self, test_set="test"):
+        assert test_set == "test" or test_set == "valid"
+        if test_set == "test":
+            return self.test_edges_neg.to(self.device)
+        elif test_set == "valid":
+            return self.valid_edges_neg.to(self.device)
 
     def get_sg_negatives(self, shape, alpha=0.75):
         weights = self.degrees.pow(alpha)
@@ -280,6 +308,9 @@ class OGBBenchmark(BasicDataset):
     def n_test_edges(self):
         return self.test_edges.size(1)
 
+    def get_degrees(self):
+        return self.degrees
+
     def get_train_loader_rw(self, batch_size, sample_negatives):
         edges = self.train_edges
         #if the graph is undirected we need to add in the bidirectional edges since OGB does not include them in split_edge
@@ -321,6 +352,10 @@ class OGBBenchmark(BasicDataset):
         '''
         return self.test_edges.to(self.device)
 
+    def get_roc_negatives(self, test_set="test"):
+        num_edges = self.n_test_edges if test_set == "test" else self.n_valid_edges
+        return torch.randint(high=self.n_users, generator=self.generator, size=(2, num_edges)).to(self.device)
+
     def get_sg_negatives(self, shape, alpha=0.75):
         weights = self.degrees.pow(alpha)
         num_samples = 1
@@ -352,7 +387,7 @@ class OGBBenchmark(BasicDataset):
             return torch.randint(high=self.n_users, generator=self.generator, size=(len(edge_idxs), NUM_MRR_NEGATIVES)).to(self.device)
 
 if __name__ == "__main__": 
-    for name in ["Cora", "CiteSeer", "PubMed"]:
+    for name in ["Cora", "CiteSeer", "PubMed", "SBM-0.2-0.1"]:
         dataset = SmallBenchmark(name, seed = 2020)
         print(
             name, 

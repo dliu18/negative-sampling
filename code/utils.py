@@ -78,14 +78,16 @@ class SkipGramAugmentedLoss(Loss):
         # neg_loss = self.model.sg_negative_loss(users, neg)
         dimension_regularization = self.model.dimension_reg()
 
-        assert "n_negative" in config
         self.opt.zero_grad()
+        pos_loss.backward()
+        self.opt.step()
+
+        assert "n_negative" in config
         # if epoch % config['n_negative'] == 0 and batch_num == 0:
         if batch_num % config['n_negative'] == 0 and batch_num > 0:
+            self.opt.zero_grad()
             dimension_regularization.backward()
-        else:
-            pos_loss.backward()
-        self.opt.step()
+            self.opt.step()
 
         return pos_loss.detach().to('cpu'), \
                 0.0, \

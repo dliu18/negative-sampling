@@ -78,6 +78,11 @@ def test(dataset, sg_model, test_set, epoch, writer):
         elif test_set == "valid":
             test_data = dataset.get_valid_data()
 
+    # test AUC
+    label, avg_auc = Evaluator.test_auc(sg_model, dataset, test_set)
+    if writer:
+        writer.add_scalar(f'metrics/{label}', avg_auc, epoch)
+
     # test MRR
     label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
     if writer:

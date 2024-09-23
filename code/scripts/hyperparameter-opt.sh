@@ -6,7 +6,7 @@ dataset="$1"
 epochs="$2"
 
 base_models=("n2v" "line")
-loss_funcs=("sg_aug")
+loss_funcs=("sg")
 lrs=(1.0 0.1 0.01)
 # n_negatives=(1, 2, 4, 1000)
 n_negatives=(10 100 1000 1000000000)
