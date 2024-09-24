@@ -68,27 +68,32 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
     return f"loss: {aver_loss:,}"
     
      
-def test(dataset, sg_model, test_set, epoch, writer):
-    test_data = None
-    if test_set != "test" and test_set != "valid":
-        raise NotImplementedError("The provided test set is not valid")
-    else:
-        if test_set == "test":    
-            test_data = dataset.get_test_data()
-        elif test_set == "valid":
-            test_data = dataset.get_valid_data()
-
-    # test AUC
-    label, avg_auc = Evaluator.test_auc(sg_model, dataset, test_set)
+def test(dataset, sg_model, epoch, writer):
+    max_memory = torch.cuda.max_memory_allocated(device=torch.device("cuda"))
     if writer:
-        writer.add_scalar(f'metrics/{label}', avg_auc, epoch)
+        writer.add_scalar("GPU usage/memory (bytes)", max_memory, epoch)
 
-    # test MRR
-    label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
-    if writer:
-        writer.add_scalar(f'metrics/{label}', all_mrr.mean(), epoch)
+    for test_set in ["valid", "test"]:
+        test_data = None
+        if test_set != "test" and test_set != "valid":
+            raise NotImplementedError("The provided test set is not valid")
+        else:
+            if test_set == "test":    
+                test_data = dataset.get_test_data()
+            elif test_set == "valid":
+                test_data = dataset.get_valid_data()
 
-    # test Hits@k
-    label, all_hits = Evaluator.test_hits(sg_model, dataset, test_set)
-    if writer:
-        writer.add_scalar(f'metrics/{label}', all_hits.mean(), epoch)
+        # test AUC
+        label, avg_auc = Evaluator.test_auc(sg_model, dataset, test_set)
+        if writer:
+            writer.add_scalar(f'metrics/{test_set}/{label}', avg_auc, epoch)
+
+        # test MRR
+        label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
+        if writer:
+            writer.add_scalar(f'metrics/{test_set}/{label}', all_mrr.mean(), epoch)
+
+        # test Hits@k
+        label, all_hits = Evaluator.test_hits(sg_model, dataset, test_set)
+        if writer:
+            writer.add_scalar(f'metrics/{test_set}/{label}', all_hits.mean(), epoch)

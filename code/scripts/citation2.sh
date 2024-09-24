@@ -9,7 +9,7 @@ python main.py \
 --dataset="ogbl-citation2" \
 --recdim=128 \
 --batch_size=1024 \
---epochs=2 \
+--epochs=3 \
 --board_path="9-21-auc"
 
 python main.py \
@@ -24,7 +24,7 @@ python main.py \
 --dataset="ogbl-citation2" \
 --recdim=128 \
 --batch_size=1024 \
---epochs=2 \
+--epochs=3 \
 --board_path="9-21-auc"
 
 python main.py \

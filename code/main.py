@@ -54,16 +54,17 @@ else:
 try:
     for epoch in range(1, world.TRAIN_epochs + 1):
         start = time.time()
-        if epoch % 1 == 0:
-            Procedure.test(dataset, sg_model, world.config["test_set"], epoch, w)
+        if world.GPU:
+            torch.cuda.reset_peak_memory_stats()
         output_information = Procedure.train(dataset, 
             sg_model, 
             loss_obj, 
             epoch, 
             writer=w)
         print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
+        if epoch % 1 == 0:
+            Procedure.test(dataset, sg_model, epoch, w)
         torch.save(sg_model.state_dict(), weight_file)
-    Procedure.test(dataset, sg_model, world.config["test_set"], world.TRAIN_epochs + 1, w)
 finally:
     if world.tensorboard:
         w.close()

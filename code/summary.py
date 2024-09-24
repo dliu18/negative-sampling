@@ -1,5 +1,6 @@
 import os
 import csv
+import numpy as np
 import tensorflow as tf
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 from tqdm import tqdm 
@@ -21,7 +22,9 @@ def get_last_metric_values_and_duration(event_file):
         if scalar_events:
             last_values[tag] = scalar_events[-1].value
             if "metrics" in tag:
-                last_values[tag] = max([event.value for event in scalar_events])
+                metric_values = np.array([event.value for event in scalar_events])
+                last_values[tag] = f"{np.max(metric_values):.4f}" 
+                last_values[tag + " epoch"] = scalar_events[np.argmax(metric_values)].step
             final_steps[tag] = scalar_events[-1].step
             # print(scalar_events)
             # Collect timestamps for duration calculation
@@ -29,7 +32,8 @@ def get_last_metric_values_and_duration(event_file):
     
     # Calculate the duration based on timestamps
     if timestamps:
-        duration = max(timestamps) - min(timestamps)
+        duration = int(max(timestamps) - min(timestamps))
+        duration = f"{duration:,}"
     else:
         duration = 0
 
@@ -69,7 +73,7 @@ def create_csv_summary(log_directory, output_csv):
     # Write to CSV
     if rows:
         # Determine all metric names
-        metric_names = rows[0].keys()
+        metric_names = rows[-1].keys()
         # metric_names = set()
         # for row in rows:
         #     metric_names.update(row.keys())

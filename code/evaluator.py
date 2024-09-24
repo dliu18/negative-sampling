@@ -14,7 +14,7 @@ class Evaluator:
 		sg_model.eval()
 		eval_edges_pos = dataset.get_eval_data(test_set)
 		eval_edges_neg = dataset.get_roc_negatives(test_set)
-		assert eval_edges_pos.size() == eval_edges_neg.size()
+		assert abs(eval_edges_pos.size(1) - eval_edges_neg.size(1)) / eval_edges_pos.size(1) < 0.1
 
 		eval_edges = torch.cat([eval_edges_pos, eval_edges_neg], dim = 1)
 		

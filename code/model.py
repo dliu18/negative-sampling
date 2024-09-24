@@ -36,6 +36,8 @@ class SGModel(BasicModel):
         self.num_users  = dataset.n_users
         self.latent_dim = config['latent_dim_rec']
         self.lam = config["lambda"]
+        self.alpha = config["alpha"]
+        self.degrees = dataset.get_degrees()
         self.device = world.device
         self.eps = 1e-15
         self.f = nn.Sigmoid()
@@ -60,7 +62,8 @@ class SGModel(BasicModel):
         return -((1 - dot_products.sigmoid() + self.eps).log().sum())
 
     def dimension_reg(self):
-        col_sums = torch.sum(self.embedding_user.weight, dim=0)
+        p_vec = self.degrees.pow(self.alpha)
+        col_sums = torch.matmul(self.embedding_user.weight.t(), p_vec)
         return self.lam * col_sums.norm(2).pow(2)
 
     def forward(self, src, tgt):
