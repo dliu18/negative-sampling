@@ -62,7 +62,11 @@ class SGModel(BasicModel):
         return -((1 - dot_products.sigmoid() + self.eps).log().sum())
 
     def dimension_reg(self):
+        # when alpha = 0, p_vec should be a vector of all ones
         p_vec = self.degrees.pow(self.alpha)
+        p_vec /= p_vec.sum()
+        p_vec *= self.n_users
+
         col_sums = torch.matmul(self.embedding_user.weight.t(), p_vec)
         return self.lam * col_sums.norm(2).pow(2)
 

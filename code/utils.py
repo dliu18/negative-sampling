@@ -54,7 +54,7 @@ class SkipGramLoss(Loss):
         pos_loss = self.model.sg_positive_loss(pos_users, pos)
 
         neg_users = users.repeat_interleave(int(len(neg) / len(users)))
-        neg_loss = self.model.sg_negative_loss(neg_users, neg)
+        neg_loss = self.model.sg_negative_loss(neg_users, neg) / world.config["K"]
         dimension_regularization = self.model.dimension_reg()
         total_loss = pos_loss + neg_loss
 
