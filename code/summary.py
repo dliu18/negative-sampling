@@ -23,8 +23,8 @@ def get_last_metric_values_and_duration(event_file):
             last_values[tag] = scalar_events[-1].value
             if "metrics" in tag:
                 metric_values = np.array([event.value for event in scalar_events])
-                last_values[tag] = f"{np.max(metric_values):.4f}" 
-                last_values[tag + " epoch"] = scalar_events[np.argmax(metric_values)].step
+                last_values[tag + " max"] = f"{np.max(metric_values):.4f}" 
+                last_values[tag + " max epoch"] = scalar_events[np.argmax(metric_values)].step
             final_steps[tag] = scalar_events[-1].step
             # print(scalar_events)
             # Collect timestamps for duration calculation
@@ -33,12 +33,12 @@ def get_last_metric_values_and_duration(event_file):
     # Calculate the duration based on timestamps
     if timestamps:
         duration = int(max(timestamps) - min(timestamps))
-        duration = f"{duration:,}"
+        duration = f"{duration}"
     else:
         duration = 0
 
     # Extract the final step value for "metrics/MRR"
-    mrr_final_step = final_steps.get("metrics/MRR", None)
+    mrr_final_step = final_steps.get("metrics/AUC_ROC", None)
     
     return last_values, duration, mrr_final_step
 
@@ -73,10 +73,12 @@ def create_csv_summary(log_directory, output_csv):
     # Write to CSV
     if rows:
         # Determine all metric names
-        metric_names = rows[-1].keys()
-        # metric_names = set()
-        # for row in rows:
-        #     metric_names.update(row.keys())
+        metric_names = []
+        for row in rows:
+            for key in row.keys():
+                if key not in metric_names:
+                    metric_names.append(key)
+
 
         with open(output_csv, 'w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=metric_names)

@@ -1,0 +1,2 @@
+Graph,Model,Loss Function,n_negative,Learning Rate,lambda,Duration,Steps,Loss/positive_loss,Loss/negative_loss,Loss/total_loss,Loss/dimension_regularization,GPU_usage/memory__bytes_,metrics/valid/AUC_ROC,metrics/valid/AUC_ROC epoch
+line,sg_aug,1000,0.01,0.001,09-25-11h59m,949,,229.9011688232422,0.0,229.9011688232422,678940901376.0,1973797888.0,0.5207,1

@@ -1,19 +1,9 @@
-"""
-Created on Mar 1, 2020
-Pytorch Implementation of LightGCN in
-Xiangnan He et al. LightGCN: Simplifying and Powering Graph Convolution Network for Recommendation
-
-@author: Jianbai Ye (gusye@mail.ustc.edu.cn)
-
-Define models here
-"""
-# import world
 import torch
 from dataloader import BasicDataset
 from torch import nn
 import numpy as np
 import world
-
+import math
 
 class BasicModel(nn.Module):    
     def __init__(self):
@@ -47,7 +37,11 @@ class SGModel(BasicModel):
         self.embedding_user = torch.nn.Embedding(
             num_embeddings=self.num_users, 
             embedding_dim=self.latent_dim,
-            device=self.device)        
+            device=self.device)
+
+        nn.init.uniform_(self.embedding_user.weight, 
+            a=-math.sqrt(self.latent_dim), 
+            b=math.sqrt(self.latent_dim))        
 
     def sg_positive_loss(self, source, target):
         u_emb = self.embedding_user(source.long())
@@ -65,7 +59,7 @@ class SGModel(BasicModel):
         # when alpha = 0, p_vec should be a vector of all ones
         p_vec = self.degrees.pow(self.alpha)
         p_vec /= p_vec.sum()
-        p_vec *= self.n_users
+        p_vec *= self.num_users
 
         col_sums = torch.matmul(self.embedding_user.weight.t(), p_vec)
         return self.lam * col_sums.norm(2).pow(2)

@@ -102,10 +102,6 @@ def train(model,
 	return total_loss / len(loader)
 
 if __name__ == "__main__":
-	# dataset = Planetoid(
-	# 	root = "../data/",
-	# 	name = "CiteSeer",
-	# )
 	dataset = PygLinkPropPredDataset(name='ogbl-collab')
 	data = dataset[0]
 	print("loaded the dataset")
@@ -142,9 +138,3 @@ if __name__ == "__main__":
 			avg_mrr = test_mrr(model, negatives_for_mrr, test_data, K_mrr)
 		loss = train(model, loader, optimizer)
 		print(f'Epoch: {epoch:02d}, Loss: {loss:.4f}')
-
-
-# questions: 
-# where are the negative samples stored in RandomLinkSplit
-# how do the split masks work. Are they pre-defined in the dataset?
-# reference this for loading the ogb datasets

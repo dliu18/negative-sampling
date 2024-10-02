@@ -1,11 +1,3 @@
-'''
-Created on Mar 1, 2020
-Pytorch Implementation of LightGCN in
-Xiangnan He et al. LightGCN: Simplifying and Powering Graph Convolution Network for Recommendation
-@author: Jianbai Ye (gusye@mail.ustc.edu.cn)
-
-Design training and test process
-'''
 import world
 import numpy as np
 import torch
@@ -89,9 +81,10 @@ def test(dataset, sg_model, epoch, writer):
             writer.add_scalar(f'metrics/{test_set}/{label}', avg_auc, epoch)
 
         # test MRR
-        label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
-        if writer:
-            writer.add_scalar(f'metrics/{test_set}/{label}', all_mrr.mean(), epoch)
+        if dataset.dataset_name != "ogbl-ppa":
+            label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
+            if writer:
+                writer.add_scalar(f'metrics/{test_set}/{label}', all_mrr.mean(), epoch)
 
         # test Hits@k
         label, all_hits = Evaluator.test_hits(sg_model, dataset, test_set)

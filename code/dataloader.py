@@ -7,12 +7,15 @@ from torch.utils.data import Dataset, DataLoader
 import world
 from time import time
 
-from torch_geometric.datasets import Planetoid, StochasticBlockModelDataset
-from torch_geometric.utils import to_undirected, degree
+from torch_geometric.datasets import Planetoid, StochasticBlockModelDataset, SNAPDataset
+from torch_geometric.utils import to_undirected, to_networkx, degree
 from torch_geometric.transforms import RandomLinkSplit
 from torch_geometric.nn import Node2Vec
 
 from ogb.linkproppred import PygLinkPropPredDataset
+
+import networkx as nx
+from networkx.algorithms import cluster 
 
 NUM_HITS_NEGATIVES = int(1e5)
 NUM_MRR_NEGATIVES = int(1e3)
@@ -49,6 +52,9 @@ class BasicDataset(Dataset):
         raise NotImplementedError
 
     def get_degrees(self):
+        raise NotImplementedError
+
+    def get_clustering_coefs(self):
         raise NotImplementedError
 
     def get_train_loader_rw(self, batch_size, sample_negatives):
@@ -112,7 +118,7 @@ class SmallBenchmark(BasicDataset):
     def __init__(self, name, seed):
         super().__init__(name, seed)
 
-        assert name in ["Cora", "CiteSeer", "PubMed"] or "SBM" in name
+        assert name in ["Cora", "CiteSeer", "PubMed", "ego-facebook", "soc-ca-astroph"] or "SBM" in name
 
         dataset = None
         if name in ["Cora", "CiteSeer", "PubMed"]:
@@ -130,6 +136,11 @@ class SmallBenchmark(BasicDataset):
                 block_sizes = torch.tensor([1000, 1000]),
                 edge_probs = B,
                 is_undirected = True)
+        elif name in ["ego-facebook", "soc-ca-astroph"]:
+            dataset = SNAPDataset(
+                root = "dataset/",
+                name = name
+            )
 
         data = dataset[0]
         self.full_data = data
@@ -184,6 +195,22 @@ class SmallBenchmark(BasicDataset):
     def get_degrees(self):
         return self.degrees
 
+    def get_clustering_coefs(self):
+        try:
+            return np.load(f"dataset/cluster/{self.name}_cluster_coefs.npy")
+        except:
+            print("Starting conversion to networkx for: ", self.name)
+            graph_nx = to_networkx(self.full_data, to_undirected = self.full_data.is_undirected())
+            print("Finished conversion to networkx for: ", self.name)
+
+            cluster_coefs_dict = cluster.clustering(graph_nx)
+            cluster_coefs = np.zeros(self.n_users)
+            for idx in range(self.n_users):
+                cluster_coefs[idx] = cluster_coefs_dict[idx]
+            np.save(f"dataset/cluster/{self.name}_cluster_coefs.npy", cluster_coefs)
+            return cluster_coefs
+
+
     def get_train_loader_rw(self, batch_size, sample_negatives):
         model = Node2Vec(self.train_edges, 
                     embedding_dim=128, # set as a placeholder but the embeddings in here are not used
@@ -197,11 +224,15 @@ class SmallBenchmark(BasicDataset):
         return loader
 
     def _sample_edges(self, batch):
-        pos = self.train_edges[:, batch].to(self.device)
-        neg = pos.clone()
+        # pos = torch.randint(high=self.n_users, generator=self.generator, size=(2, len(batch))).to(self.device)
+        # return pos.t(), None
+        
+        # pos = self.train_edges[:, batch].to(self.device)
+        pos = self.train_edges[:, batch]
+        # neg = pos.clone()
 
-        neg[1] = torch.randint(high=self.n_users, generator=self.generator, size=(neg.size(1),)).to(self.device)
-        return pos.t(), neg.t()
+        # neg[1] = torch.randint(high=self.n_users, generator=self.generator, size=(neg.size(1),)).to(self.device)
+        return pos.t(), None
 
     def get_train_loader_edges(self, batch_size, sample_negatives):
         '''
@@ -311,6 +342,21 @@ class OGBBenchmark(BasicDataset):
     def get_degrees(self):
         return self.degrees
 
+    def get_clustering_coefs(self):
+        try:
+            return np.load(f"dataset/cluster/{self.name}_cluster_coefs.npy")
+        except:
+            print("Starting conversion to networkx for: ", self.name)
+            graph_nx = to_networkx(self.full_data, to_undirected = self.full_data.is_undirected())
+            print("Finished conversion to networkx for: ", self.name)
+
+            cluster_coefs_dict = cluster.clustering(graph_nx)
+            cluster_coefs = np.zeros(self.n_users)
+            for idx in range(self.n_users):
+                cluster_coefs[idx] = cluster_coefs_dict[idx]
+            np.save(f"dataset/cluster/{self.name}_cluster_coefs.npy", cluster_coefs)
+            return cluster_coefs
+
     def get_train_loader_rw(self, batch_size, sample_negatives):
         edges = self.train_edges
         #if the graph is undirected we need to add in the bidirectional edges since OGB does not include them in split_edge
@@ -387,7 +433,7 @@ class OGBBenchmark(BasicDataset):
             return torch.randint(high=self.n_users, generator=self.generator, size=(len(edge_idxs), NUM_MRR_NEGATIVES)).to(self.device)
 
 if __name__ == "__main__": 
-    for name in ["Cora", "CiteSeer", "PubMed", "SBM-0.2-0.1"]:
+    for name in ["Cora", "CiteSeer", "PubMed", "SBM-0.7-0.008"]:
         dataset = SmallBenchmark(name, seed = 2020)
         print(
             name, 
@@ -399,20 +445,24 @@ if __name__ == "__main__":
             dataset.n_valid_edges,
             "\n Test edges: ",
             dataset.n_test_edges,
+            "\n Average Clustering Coefficient: ",
+            np.mean(dataset.get_clustering_coefs()),
             "\n"
         )
 
-    for name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]:
-        dataset = OGBBenchmark(name, seed = 2020)
-        print(
-            name, 
-            "\n Nodes: ",
-            dataset.n_users,
-            "\n Train edges: ",
-            dataset.n_train_edges,
-            "\n Validation edges: ",
-            dataset.n_valid_edges,
-            "\n Test edges: ",
-            dataset.n_test_edges,
-            "\n"
-        )
+    # for name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]:
+    #     dataset = OGBBenchmark(name, seed = 2020)
+    #     print(
+    #         name, 
+    #         "\n Nodes: ",
+    #         dataset.n_users,
+    #         "\n Train edges: ",
+    #         dataset.n_train_edges,
+    #         "\n Validation edges: ",
+    #         dataset.n_valid_edges,
+    #         "\n Test edges: ",
+    #         dataset.n_test_edges,
+    #         "\n Average Clustering Coefficient: ",
+    #         np.mean(dataset.get_clustering_coefs()),
+    #         "\n"
+    #     )

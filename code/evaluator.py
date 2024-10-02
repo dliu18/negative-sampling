@@ -19,8 +19,9 @@ class Evaluator:
 		eval_edges = torch.cat([eval_edges_pos, eval_edges_neg], dim = 1)
 		
 		num_pos = eval_edges_pos.size(1)
+		num_neg = eval_edges_neg.size(1)
 		eval_labels = num_pos * [1]
-		eval_labels.extend(num_pos * [0])
+		eval_labels.extend(num_neg * [0])
 		eval_labels = np.array(eval_labels)
 
 		aucs = []

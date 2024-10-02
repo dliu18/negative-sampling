@@ -1,11 +1,3 @@
-'''
-Created on Mar 1, 2020
-Pytorch Implementation of LightGCN in
-Xiangnan He et al. LightGCN: Simplifying and Powering Graph Convolution Network for Recommendation
-
-@author: Jianbai Ye (gusye@mail.ustc.edu.cn)
-'''
-
 import os
 from os.path import join
 import torch
@@ -22,7 +14,7 @@ DATA_PATH = join(ROOT_PATH, 'data')
 BOARD_PATH = join(CODE_PATH, 'runs')
 if len(args.board_path) > 0:
 	BOARD_PATH = join(BOARD_PATH, args.board_path)
-FILE_PATH = join(CODE_PATH, 'checkpoints')
+FILE_PATH = join(CODE_PATH, 'checkpoints', args.test_set)
 import sys
 sys.path.append(join(CODE_PATH, 'sources'))
 
