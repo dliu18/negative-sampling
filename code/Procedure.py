@@ -59,7 +59,32 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
     aver_loss = aver_loss / total_batch
     return f"loss: {aver_loss:,}"
     
-     
+def train_edge_classifier(dataset, sg_model, loss_obj, epochs=10, plot=False):
+    sg_model.train()
+    sg_model.freeze_embeddings()
+
+    loader = dataset.get_train_loader_edges(
+        batch_size = world.config['batch_size'], 
+        sample_negatives = True)
+
+    num_users = dataset.n_users
+    for epoch in range(epochs):
+        batch_i = 0
+        for pos_sample, _ in loader:
+            batch_pos = pos_sample[:, 1:].reshape(-1).to('cuda')
+            batch_neg = dataset.get_sg_negatives(
+                shape = (len(batch_pos),),
+                alpha = 0.0).to('cuda')
+            batch_users = pos_sample[:, 0].reshape(-1).to('cuda')
+
+            classifier_loss = loss_obj.CrossEntropyLoss(batch_users, batch_pos, batch_neg)
+            if world.tensorboard and plot:
+                writer.add_scalar(f'Loss/classifier_loss', classifier_loss, epoch * int(num_users / world.config['batch_size']) + batch_i)
+            batch_i += 1
+
+    sg_model.unfreeze_embeddings()
+
+
 def test(dataset, sg_model, epoch, writer):
     max_memory = torch.cuda.max_memory_allocated(device=torch.device("cuda"))
     if writer:
