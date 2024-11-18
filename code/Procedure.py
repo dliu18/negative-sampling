@@ -51,15 +51,15 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
             batch_neg)
         aver_loss += (pos_loss + neg_loss)
         if world.tensorboard:
-            writer.add_scalar(f'Loss/positive_loss', pos_loss, epoch * int(num_users / world.config['batch_size']) + batch_i)
-            writer.add_scalar(f'Loss/negative_loss', neg_loss, epoch * int(num_users / world.config['batch_size']) + batch_i)
-            writer.add_scalar(f'Loss/total_loss', pos_loss + neg_loss, epoch * int(num_users / world.config['batch_size']) + batch_i)
+            writer.add_scalar(f'Loss/positive_loss', pos_loss, epoch * total_batch + batch_i)
+            writer.add_scalar(f'Loss/negative_loss', neg_loss, epoch * total_batch + batch_i)
+            writer.add_scalar(f'Loss/total_loss', pos_loss + neg_loss, epoch * total_batch + batch_i)
             writer.add_scalar(f'Loss/dimension_regularization', dimension_regularization, epoch * int(num_users / world.config['batch_size']) + batch_i)
         batch_i += 1
     aver_loss = aver_loss / total_batch
     return f"loss: {aver_loss:,}"
     
-def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=250, plot=False):
+def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=50, plot=False):
     sg_model.train()
     sg_model.freeze_embeddings()
     loss_obj.reset_classifier_optimization()
@@ -69,8 +69,9 @@ def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=250, 
         sample_negatives = True)
 
     num_users = dataset.n_users
+    total_batch = num_users // world.config['batch_size'] + 1
     for epoch in tqdm(range(epochs)):
-        if epoch % 10 == 0:
+        if epoch % 1 == 0:
             test(dataset, sg_model, epoch, writer, prefix="classifier/", print_result=False)
         batch_i = 0
         for pos_sample, _ in loader:
@@ -82,7 +83,7 @@ def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=250, 
 
             classifier_loss = loss_obj.CrossEntropyLoss(batch_users, batch_pos, batch_neg)
             if world.tensorboard and plot:
-                writer.add_scalar(f'Loss/classifier_loss', classifier_loss, epoch * int(num_users / world.config['batch_size']) + batch_i)
+                writer.add_scalar(f'Loss/classifier_loss', classifier_loss, epoch * total_batch + batch_i)
             batch_i += 1
 
     sg_model.unfreeze_embeddings()

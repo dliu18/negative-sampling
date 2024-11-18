@@ -41,9 +41,9 @@ class SGModel(BasicModel):
 
         # TODO: define the classifier 
         self.classifier = nn.Sequential(
-            nn.Linear(self.latent_dim, 64),  # Input: concatenated embeddings
-            nn.ReLU(),
-            nn.Linear(64, 1),  # Output: binary classification
+            # nn.Linear(self.latent_dim, 64),  # Input: concatenated embeddings
+            # nn.ReLU(),
+            nn.Linear(self.latent_dim, 1),  # Output: binary classification
             nn.Sigmoid()  # Sigmoid for binary output
         )
 
@@ -83,9 +83,9 @@ class SGModel(BasicModel):
             param.requires_grad = False
 
         self.classifier = nn.Sequential(
-            nn.Linear(self.latent_dim, 64),  # Input: concatenated embeddings
-            nn.ReLU(),
-            nn.Linear(64, 1),  # Output: binary classification
+            # nn.Linear(self.latent_dim, 64),  # Input: concatenated embeddings
+            # nn.ReLU(),
+            nn.Linear(self.latent_dim, 1),  # Output: binary classification
             nn.Sigmoid()  # Sigmoid for binary output
         ).to('cuda')
         for param in self.classifier.parameters():
