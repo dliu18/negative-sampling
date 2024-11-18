@@ -59,16 +59,19 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
     aver_loss = aver_loss / total_batch
     return f"loss: {aver_loss:,}"
     
-def train_edge_classifier(dataset, sg_model, loss_obj, epochs=10, plot=False):
+def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=250, plot=False):
     sg_model.train()
     sg_model.freeze_embeddings()
+    loss_obj.reset_classifier_optimization()
 
     loader = dataset.get_train_loader_edges(
         batch_size = world.config['batch_size'], 
         sample_negatives = True)
 
     num_users = dataset.n_users
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
+        if epoch % 10 == 0:
+            test(dataset, sg_model, epoch, writer, prefix="classifier/", print_result=False)
         batch_i = 0
         for pos_sample, _ in loader:
             batch_pos = pos_sample[:, 1:].reshape(-1).to('cuda')
@@ -85,9 +88,9 @@ def train_edge_classifier(dataset, sg_model, loss_obj, epochs=10, plot=False):
     sg_model.unfreeze_embeddings()
 
 
-def test(dataset, sg_model, epoch, writer):
+def test(dataset, sg_model, epoch, writer, prefix="", print_result=True):
     max_memory = torch.cuda.max_memory_allocated(device=torch.device("cuda"))
-    if writer:
+    if writer and prefix == "":
         writer.add_scalar("GPU usage/memory (bytes)", max_memory, epoch)
 
     for test_set in ["valid", "test"]:
@@ -102,16 +105,23 @@ def test(dataset, sg_model, epoch, writer):
 
         # test AUC
         label, avg_auc = Evaluator.test_auc(sg_model, dataset, test_set)
+        if print_result:
+            print(f'AUC: {avg_auc:.4f}')
         if writer:
-            writer.add_scalar(f'metrics/{test_set}/{label}', avg_auc, epoch)
+            writer.add_scalar(prefix + f'metrics/{test_set}/{label}', avg_auc, epoch)
 
         # test MRR
         if dataset.dataset_name != "ogbl-ppa":
             label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
+            if print_result:
+                print(f'MRR: {all_mrr.mean():.4f}')
             if writer:
-                writer.add_scalar(f'metrics/{test_set}/{label}', all_mrr.mean(), epoch)
+                writer.add_scalar(prefix + f'metrics/{test_set}/{label}', all_mrr.mean(), epoch)
 
         # test Hits@k
-        label, all_hits = Evaluator.test_hits(sg_model, dataset, test_set)
+        K = 50
+        label, all_hits = Evaluator.test_hits(sg_model, K, dataset, test_set)
+        if print_result:
+            print(f'Hits@{K}: {all_hits.mean():.4f}')
         if writer:
-            writer.add_scalar(f'metrics/{test_set}/{label}', all_hits.mean(), epoch)
+            writer.add_scalar(prefix + f'metrics/{test_set}/{label}', all_hits.mean(), epoch)

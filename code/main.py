@@ -58,7 +58,7 @@ try:
 	for epoch in range(1, world.TRAIN_epochs + 1):
 		if epoch % 1 == 0:
 			# TODO: Train an MLP on edge features and evaluate
-			Procedure.train_edge_classifier(dataset, sg_model, loss_obj)
+			# Procedure.train_edge_classifier(dataset, sg_model, loss_obj, plot=False)
 			Procedure.test(dataset, sg_model, epoch, w)
 
 		start = time.time()
@@ -74,13 +74,13 @@ try:
 			loss_obj, 
 			epoch, 
 			writer=w)
-		print(f'EPOCH[{epoch+1}/{world.TRAIN_epochs}] {output_information}')
+		print(f'EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}')
 
 
 		torch.save(sg_model.state_dict(), weight_file)
 
 		# print(prof.key_averages().table(sort_by="self_cuda_memory_usage", row_limit=10))
-	Procedure.train_edge_classifier(dataset, sg_model, loss_obj)
+	Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=True)
 	Procedure.test(dataset, sg_model, epoch, w)
 finally:
 	if world.tensorboard:

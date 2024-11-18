@@ -31,7 +31,6 @@ class Evaluator:
 				y_score = scores, 
 				y_true = eval_labels[src_idxs.cpu()]))
 		avg_auc = np.mean(aucs)
-		print(f'AUC: {avg_auc:.4f}')
 		return "AUC ROC", avg_auc
 
 	@staticmethod
@@ -83,12 +82,11 @@ class Evaluator:
 		# print(f'MRR: {avg_mrr:.4f}')
 		# return "MRR", avg_mrr
 		all_mrr = torch.cat(all_mrr, dim=1)
-		print(f'MRR: {all_mrr.mean():.4f}')
 		return "MRR", all_mrr
 
 	@staticmethod
 	@torch.no_grad()
-	def test_hits(sg_model, dataset, test_set):
+	def test_hits(sg_model, K, dataset, test_set):
 		def _get_negative_scores(sg_model, negatives_for_hits):
 			'''
 			negatives_for_hits: tensor of shape (2, num_negatives) containing indices of nodes
@@ -104,7 +102,6 @@ class Evaluator:
 		eval_edges = dataset.get_eval_data(test_set)
 		negatives_for_hits = dataset.get_hits_negatives(test_set)
 		device = negatives_for_hits.device
-		K = 50
 
 		y_neg = _get_negative_scores(sg_model, negatives_for_hits)
 		total_hits = 0.
@@ -125,5 +122,4 @@ class Evaluator:
 		# avg_hits = total_hits / eval_edges.size(1)
 		# print(f'Hits@{K}: {avg_hits:.4f}')
 		# return f'Hits@{K}', avg_hits
-		print(f'Hits@{K}: {all_hits.mean():.4f}')
 		return f'Hits@{K}', all_hits

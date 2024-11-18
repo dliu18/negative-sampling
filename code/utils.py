@@ -28,20 +28,25 @@ class Loss:
                  config : dict):
         self.model = sg_model
         self.lr = config['lr']
-        self.opt = optim.Adam(sg_model.parameters(), lr=self.lr)
-        self.opt_classifier = optim.Adam(sg_model.parameters(), lr=self.lr)
+        self.opt = optim.Adam(sg_model.get_embeddings().parameters(), lr=self.lr)
+        self.opt_classifier = optim.Adam(sg_model.get_classifier().parameters(), lr=self.lr)
 
     def stageOne(self, epoch, batch_num, users, pos, neg):
         raise NotImplementedError
+
+    def reset_classifier_optimization(self):
+        self.opt_classifier = optim.Adam(self.model.get_classifier().parameters(), lr=self.lr * 0.00001)
 
     def CrossEntropyLoss(self, users, pos, neg):
         pos_loss = -torch.log(self.model(users, pos) + 1e-15).mean()
         neg_loss = -torch.log(1 - self.model(users, neg) + 1e-15).mean()
         total_loss = pos_loss + neg_loss
-        
+
         self.opt_classifier.zero_grad()
         total_loss.backward()
         self.opt_classifier.step()
+
+        return pos_loss.detach().to('cpu') + neg_loss.detach().to('cpu')
 
 class SkipGramLoss(Loss):
     def __init__(self,
@@ -65,7 +70,7 @@ class SkipGramLoss(Loss):
         total_loss.backward()
         self.opt.step()
 
-        return pos_loss.detach().to('cpu'), neg_loss.detach().to('cpu'), dimension_regularization.detach().to('cpu')
+        return pos_loss.detach().to('cpu')/len(users), neg_loss.detach().to('cpu')/len(users), dimension_regularization.detach().to('cpu')
 
 class SkipGramAugmentedLoss(Loss):
     def __init__(self,

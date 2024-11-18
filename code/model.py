@@ -51,6 +51,12 @@ class SGModel(BasicModel):
         #     a=-math.sqrt(self.latent_dim), 
         #     b=math.sqrt(self.latent_dim))        
 
+    def get_embeddings(self):
+        return self.embedding_user
+
+    def get_classifier(self):
+        return self.classifier
+
     def sg_positive_loss(self, source, target):
         u_emb = self.embedding_user(source.long())
         v_emb = self.embedding_user(target.long())
@@ -76,9 +82,21 @@ class SGModel(BasicModel):
         for param in self.embedding_user.parameters():
             param.requires_grad = False
 
+        self.classifier = nn.Sequential(
+            nn.Linear(self.latent_dim, 64),  # Input: concatenated embeddings
+            nn.ReLU(),
+            nn.Linear(64, 1),  # Output: binary classification
+            nn.Sigmoid()  # Sigmoid for binary output
+        ).to('cuda')
+        for param in self.classifier.parameters():
+            param.requires_grad = True
+
     def unfreeze_embeddings(self):
         for param in self.embedding_user.parameters():
             param.requires_grad = True
+
+        for param in self.classifier.parameters():
+            param.requires_grad = False
 
     def _get_edge_features(self, src, tgt, method):
         """
@@ -107,4 +125,4 @@ class SGModel(BasicModel):
     # TODO: give the classifier output
     def forward(self, src, tgt, method="hadamard"):
         edge_features = self._get_edge_features(src, tgt, method)
-        return self.classifier(edge_features)
+        return self.classifier(edge_features).reshape(-1)
