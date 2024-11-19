@@ -31,8 +31,8 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
             batch_size = world.config['batch_size'], 
             sample_negatives = True)
 
-    num_users = dataset.n_users
-    total_batch = num_users // world.config['batch_size'] + 1
+    num_edges = dataset.n_train_edges
+    total_batch = num_edges // world.config['batch_size'] + 1
     aver_loss = 0.
     batch_i = 0
 
@@ -54,25 +54,27 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
             writer.add_scalar(f'Loss/positive_loss', pos_loss, epoch * total_batch + batch_i)
             writer.add_scalar(f'Loss/negative_loss', neg_loss, epoch * total_batch + batch_i)
             writer.add_scalar(f'Loss/total_loss', pos_loss + neg_loss, epoch * total_batch + batch_i)
-            writer.add_scalar(f'Loss/dimension_regularization', dimension_regularization, epoch * int(num_users / world.config['batch_size']) + batch_i)
+            writer.add_scalar(f'Loss/dimension_regularization', dimension_regularization, epoch * total_batch + batch_i)
         batch_i += 1
     aver_loss = aver_loss / total_batch
     return f"loss: {aver_loss:,}"
     
-def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=50, plot=False):
+def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=5, plot=False):
     sg_model.train()
     sg_model.freeze_embeddings()
     loss_obj.reset_classifier_optimization()
 
+    batch_size = world.config['batch_size'] * 5
     loader = dataset.get_train_loader_edges(
-        batch_size = world.config['batch_size'], 
+        batch_size = batch_size, 
         sample_negatives = True)
 
-    num_users = dataset.n_users
-    total_batch = num_users // world.config['batch_size'] + 1
+    num_edges = dataset.n_train_edges
+    total_batch = num_edges // batch_size + 1
     for epoch in tqdm(range(epochs)):
         if epoch % 1 == 0:
-            test(dataset, sg_model, epoch, writer, prefix="classifier/", print_result=False)
+            test(dataset, sg_model, epoch, writer, 
+                prefix="classifier/", print_result=False, use_classifier=True)
         batch_i = 0
         for pos_sample, _ in loader:
             batch_pos = pos_sample[:, 1:].reshape(-1).to('cuda')
@@ -89,7 +91,7 @@ def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=50, p
     sg_model.unfreeze_embeddings()
 
 
-def test(dataset, sg_model, epoch, writer, prefix="", print_result=True):
+def test(dataset, sg_model, epoch, writer, prefix="", print_result=True, use_classifier=True):
     max_memory = torch.cuda.max_memory_allocated(device=torch.device("cuda"))
     if writer and prefix == "":
         writer.add_scalar("GPU usage/memory (bytes)", max_memory, epoch)
@@ -105,7 +107,7 @@ def test(dataset, sg_model, epoch, writer, prefix="", print_result=True):
                 test_data = dataset.get_valid_data()
 
         # test AUC
-        label, avg_auc = Evaluator.test_auc(sg_model, dataset, test_set)
+        label, avg_auc = Evaluator.test_auc(sg_model, dataset, test_set, use_classifier)
         if print_result:
             print(f'AUC: {avg_auc:.4f}')
         if writer:
@@ -113,7 +115,7 @@ def test(dataset, sg_model, epoch, writer, prefix="", print_result=True):
 
         # test MRR
         if dataset.dataset_name != "ogbl-ppa":
-            label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
+            label, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set, use_classifier)
             if print_result:
                 print(f'MRR: {all_mrr.mean():.4f}')
             if writer:
@@ -121,7 +123,7 @@ def test(dataset, sg_model, epoch, writer, prefix="", print_result=True):
 
         # test Hits@k
         K = 50
-        label, all_hits = Evaluator.test_hits(sg_model, K, dataset, test_set)
+        label, all_hits = Evaluator.test_hits(sg_model, K, dataset, test_set, use_classifier)
         if print_result:
             print(f'Hits@{K}: {all_hits.mean():.4f}')
         if writer:

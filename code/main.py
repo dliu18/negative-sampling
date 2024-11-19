@@ -55,33 +55,32 @@ else:
 	world.cprint("not enable tensorflowboard")
 
 try:
-	for epoch in range(1, world.TRAIN_epochs + 1):
-		if epoch % 1 == 0:
-			# TODO: Train an MLP on edge features and evaluate
-			# Procedure.train_edge_classifier(dataset, sg_model, loss_obj, plot=False)
-			Procedure.test(dataset, sg_model, epoch, w)
+	if not world.BYPASS_SKIPGRAM:
+		for epoch in range(1, world.TRAIN_epochs + 1):
+			if epoch % 1 == 0:
+				Procedure.test(dataset, sg_model, epoch, w, use_classifier=False)
 
-		start = time.time()
-		if world.GPU:
-			torch.cuda.reset_peak_memory_stats()
-		# with torch.profiler.profile(
-		# 	activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
-		# 	profile_memory=True,
-		# 	record_shapes=True
-		# ) as prof:
-		output_information = Procedure.train(dataset, 
-			sg_model, 
-			loss_obj, 
-			epoch, 
-			writer=w)
-		print(f'EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}')
+			start = time.time()
+			if world.GPU:
+				torch.cuda.reset_peak_memory_stats()
+			# with torch.profiler.profile(
+			# 	activities=[torch.profiler.ProfilerActivity.CPU, torch.profiler.ProfilerActivity.CUDA],
+			# 	profile_memory=True,
+			# 	record_shapes=True
+			# ) as prof:
+			output_information = Procedure.train(dataset, 
+				sg_model, 
+				loss_obj, 
+				epoch, 
+				writer=w)
+			print(f'EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}')
 
 
-		torch.save(sg_model.state_dict(), weight_file)
+			torch.save(sg_model.state_dict(), weight_file)
 
-		# print(prof.key_averages().table(sort_by="self_cuda_memory_usage", row_limit=10))
+			# print(prof.key_averages().table(sort_by="self_cuda_memory_usage", row_limit=10))
+
 	Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=True)
-	Procedure.test(dataset, sg_model, epoch, w)
 finally:
 	if world.tensorboard:
 		w.close()

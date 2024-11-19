@@ -41,9 +41,13 @@ class SGModel(BasicModel):
 
         # TODO: define the classifier 
         self.classifier = nn.Sequential(
-            # nn.Linear(self.latent_dim, 64),  # Input: concatenated embeddings
-            # nn.ReLU(),
-            nn.Linear(self.latent_dim, 1),  # Output: binary classification
+            nn.Linear(2 * self.latent_dim, 128),  # Input: concatenated embeddings
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(64, 1),  # Output: binary classification
             nn.Sigmoid()  # Sigmoid for binary output
         )
 
@@ -83,9 +87,13 @@ class SGModel(BasicModel):
             param.requires_grad = False
 
         self.classifier = nn.Sequential(
-            # nn.Linear(self.latent_dim, 64),  # Input: concatenated embeddings
-            # nn.ReLU(),
-            nn.Linear(self.latent_dim, 1),  # Output: binary classification
+            nn.Linear(2 * self.latent_dim, 128),  # Input: concatenated embeddings
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(128, 64),
+            nn.ReLU(),
+            nn.Dropout(0.3),
+            nn.Linear(64, 1),  # Output: binary classification
             nn.Sigmoid()  # Sigmoid for binary output
         ).to('cuda')
         for param in self.classifier.parameters():
@@ -123,6 +131,14 @@ class SGModel(BasicModel):
             raise ValueError("Unsupported feature combination method")
 
     # TODO: give the classifier output
-    def forward(self, src, tgt, method="hadamard"):
-        edge_features = self._get_edge_features(src, tgt, method)
-        return self.classifier(edge_features).reshape(-1)
+    def forward(self, src, tgt, use_classifier, method="concatenate"):
+        if use_classifier:
+            edge_features = self._get_edge_features(src, tgt, method)
+            return self.classifier(edge_features).reshape(-1)
+        else:
+            src = src.long()
+            tgt = tgt.long()
+            src_emb = self.embedding_user(src)
+            tgt_emb = self.embedding_user(tgt)
+            scores = torch.sum(src_emb*tgt_emb, dim=1)
+            return scores

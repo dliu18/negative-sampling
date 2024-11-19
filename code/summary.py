@@ -38,7 +38,7 @@ def get_last_metric_values_and_duration(event_file):
         duration = 0
 
     # Extract the final step value for "metrics/MRR"
-    mrr_final_step = final_steps.get("metrics/AUC_ROC", None)
+    mrr_final_step = final_steps.get("metrics/test/AUC_ROC", None)
     
     return last_values, duration, mrr_final_step
 

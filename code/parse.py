@@ -39,6 +39,7 @@ def parse_args():
                         help="Cadence (in epochs) at which the dimension regularization is applied.")
     parser.add_argument('--comment', type=str,default="")
     parser.add_argument('--load', type=int,default=0)
+    parser.add_argument('--bypass_skipgram', type=bool,default=False)
     parser.add_argument('--epochs', type=int,default=1000)
     parser.add_argument('--multicore', type=int, default=0, help='whether we use multiprocessing or not in test')
     parser.add_argument('--pretrain', type=int, default=0, help='whether we use pretrained weight or not')

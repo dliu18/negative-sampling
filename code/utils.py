@@ -35,11 +35,11 @@ class Loss:
         raise NotImplementedError
 
     def reset_classifier_optimization(self):
-        self.opt_classifier = optim.Adam(self.model.get_classifier().parameters(), lr=self.lr * 0.00001)
+        self.opt_classifier = optim.Adam(self.model.get_classifier().parameters(), lr=self.lr * 0.1) #0.00001
 
     def CrossEntropyLoss(self, users, pos, neg):
-        pos_loss = -torch.log(self.model(users, pos) + 1e-15).mean()
-        neg_loss = -torch.log(1 - self.model(users, neg) + 1e-15).mean()
+        pos_loss = -torch.log(self.model(users, pos, use_classifier=True) + 1e-15).mean()
+        neg_loss = -torch.log(1 - self.model(users, neg, use_classifier=True) + 1e-15).mean()
         total_loss = pos_loss + neg_loss
 
         self.opt_classifier.zero_grad()

@@ -51,6 +51,7 @@ dataset = args.dataset
 
 
 TRAIN_epochs = args.epochs
+BYPASS_SKIPGRAM = args.bypass_skipgram
 LOAD = args.load
 PATH = args.path
 topks = eval(args.topks)
