@@ -6,11 +6,14 @@ dataset="$1"
 epochs="$2"
 lr="$3"
 
-base_models=("n2v" "line")
+# base_models=("n2v" "line")
+base_models=("n2v")
 loss_funcs=("sg" "sg_aug")
 
-n_negatives=(10 100 1000 1000000000)
-lams=(1.0 0.1 0.01)
+n_negatives=(1 4 10 1000000000)
+# n_negatives=(1 10 100 1000 1000000000)
+lams=(10.0 1.0 0.1 0.01)
+# lams=(1.0 0.1 0.01)
 
 # Iterate over all combinations of base_model and loss_func
 for base_model in "${base_models[@]}"; do

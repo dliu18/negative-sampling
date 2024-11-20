@@ -152,16 +152,30 @@
 # --board_path="scratch"
 
 python main.py \
---base_model="n2v" \
+--base_model="line" \
 --loss_func="sg" \
 --test_set="test" \
---lr=0.01 \
+--lr=0.001 \
 --seed=2020 \
---dataset="ogbl-collab" \
+--dataset="Cora" \
 --recdim=128 \
 --batch_size=256 \
---epochs=2 \
+--epochs=15 \
 --board_path="classifier"
+
+# python main.py \
+# --base_model="n2v" \
+# --loss_func="sg" \
+# --test_set="test" \
+# --lr=0.01 \
+# --seed=2020 \
+# --dataset="ogbl-collab" \
+# --recdim=128 \
+# --batch_size=256 \
+# --epochs=2 \
+# --board_path="classifier" 
+# --load=1 \
+# --bypass_skipgram=True
 
 # python main.py \
 # --base_model="n2v" \

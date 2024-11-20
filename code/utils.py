@@ -70,7 +70,7 @@ class SkipGramLoss(Loss):
         total_loss.backward()
         self.opt.step()
 
-        return pos_loss.detach().to('cpu')/len(users), neg_loss.detach().to('cpu')/len(users), dimension_regularization.detach().to('cpu')
+        return pos_loss.detach().to('cpu'), neg_loss.detach().to('cpu'), dimension_regularization.detach().to('cpu')
 
 class SkipGramAugmentedLoss(Loss):
     def __init__(self,

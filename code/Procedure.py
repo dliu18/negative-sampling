@@ -17,7 +17,7 @@ CORES = multiprocessing.cpu_count() // 2
 
 
 # expects the loss to be either SkipGramAugmentedLoss or SkipGramLoss
-def train(dataset, sg_model, loss_obj, epoch, writer=None):
+def train(dataset, sg_model, loss_obj, epoch, completed_batches, writer=None):
     sg_model.train() # puts the model in training mode
     loss_obj: utils.Loss = loss_obj
 
@@ -34,7 +34,6 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
     num_edges = dataset.n_train_edges
     total_batch = num_edges // world.config['batch_size'] + 1
     aver_loss = 0.
-    batch_i = 0
 
     for pos_sample, _ in tqdm(loader):
         # each row of pos and neg samples is of the form [src, dst1, dst2, ...]
@@ -45,26 +44,26 @@ def train(dataset, sg_model, loss_obj, epoch, writer=None):
         batch_users = pos_sample[:, 0].reshape(-1).to('cuda')
 
         pos_loss, neg_loss, dimension_regularization = loss_obj.stageOne(epoch,
-            batch_i, 
+            completed_batches, 
             batch_users, 
             batch_pos, 
             batch_neg)
         aver_loss += (pos_loss + neg_loss)
         if world.tensorboard:
-            writer.add_scalar(f'Loss/positive_loss', pos_loss, epoch * total_batch + batch_i)
-            writer.add_scalar(f'Loss/negative_loss', neg_loss, epoch * total_batch + batch_i)
-            writer.add_scalar(f'Loss/total_loss', pos_loss + neg_loss, epoch * total_batch + batch_i)
-            writer.add_scalar(f'Loss/dimension_regularization', dimension_regularization, epoch * total_batch + batch_i)
-        batch_i += 1
+            writer.add_scalar(f'Loss/positive_loss', pos_loss, completed_batches)
+            writer.add_scalar(f'Loss/negative_loss', neg_loss, completed_batches)
+            writer.add_scalar(f'Loss/total_loss', pos_loss + neg_loss, completed_batches)
+            writer.add_scalar(f'Loss/dimension_regularization', dimension_regularization, completed_batches)
+        completed_batches += 1
     aver_loss = aver_loss / total_batch
-    return f"loss: {aver_loss:,}"
+    return f"loss: {aver_loss:,}", completed_batches
     
 def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=5, plot=False):
     sg_model.train()
     sg_model.freeze_embeddings()
     loss_obj.reset_classifier_optimization()
 
-    batch_size = world.config['batch_size'] * 5
+    batch_size = world.config['batch_size']
     loader = dataset.get_train_loader_edges(
         batch_size = batch_size, 
         sample_negatives = True)

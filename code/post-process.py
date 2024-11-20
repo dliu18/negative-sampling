@@ -14,9 +14,12 @@ print(">>SEED:", world.seed)
 # ==============================
 
 datasets = ["Cora", "CiteSeer", "PubMed", "ogbl-collab", "ogbl-ppa", "ogbl-citation2"]
+# datasets = ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]
+
 metrics = ["Hits@K", "MRR"]
 test_set = "test"
-base_model = "line"
+base_model = "n2v"
+K = 50
 
 def color(name):
     colors = {
@@ -114,9 +117,11 @@ if __name__ == "__main__":
             except FileNotFoundError:
                 print(f"{weight_file} not exists, start from beginning")
                 continue
+            except:
+                continue
             eval_edges = dataset.get_eval_data(test_set)
-            _, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set)
-            _, all_hits = Evaluator.test_hits(sg_model, dataset, test_set)
+            _, all_mrr = Evaluator.test_mrr(sg_model, dataset, test_set, use_classifier=True)
+            _, all_hits = Evaluator.test_hits(sg_model, K, dataset, test_set, use_classifier=True)
             
             # features = degrees[eval_edges[0]]
             features = cluster_coefs[eval_edges[0]]
@@ -146,4 +151,4 @@ if __name__ == "__main__":
             axs[r][c].set_ylabel(metrics[r])
             axs[r][c].set_title(datasets[c])
             # axs[r][c].set_xscale("log")
-    plt.savefig(f"../figs/metrics_by_cluster_coef_{base_model}.pdf", bbox_inches="tight")
+    plt.savefig(f"../figs/metrics_by_clustering_coef_{base_model}.pdf", bbox_inches="tight")

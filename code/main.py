@@ -56,6 +56,7 @@ else:
 
 try:
 	if not world.BYPASS_SKIPGRAM:
+		completed_batches = 0
 		for epoch in range(1, world.TRAIN_epochs + 1):
 			if epoch % 1 == 0:
 				Procedure.test(dataset, sg_model, epoch, w, use_classifier=False)
@@ -68,19 +69,20 @@ try:
 			# 	profile_memory=True,
 			# 	record_shapes=True
 			# ) as prof:
-			output_information = Procedure.train(dataset, 
+			output_information, completed_batches = Procedure.train(dataset, 
 				sg_model, 
 				loss_obj, 
-				epoch, 
+				epoch,
+				completed_batches, 
 				writer=w)
 			print(f'EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}')
 
 
-			torch.save(sg_model.state_dict(), weight_file)
 
 			# print(prof.key_averages().table(sort_by="self_cuda_memory_usage", row_limit=10))
 
 	Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=True)
+	torch.save(sg_model.state_dict(), weight_file)
 finally:
 	if world.tensorboard:
 		w.close()
