@@ -58,7 +58,7 @@ def train(dataset, sg_model, loss_obj, epoch, completed_batches, writer=None):
     aver_loss = aver_loss / total_batch
     return f"loss: {aver_loss:,}", completed_batches
     
-def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=5, plot=False):
+def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=25, plot=False):
     sg_model.train()
     sg_model.freeze_embeddings()
     loss_obj.reset_classifier_optimization()
@@ -76,13 +76,18 @@ def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=5, pl
                 prefix="classifier/", print_result=False, use_classifier=True)
         batch_i = 0
         for pos_sample, _ in loader:
-            batch_pos = pos_sample[:, 1:].reshape(-1).to('cuda')
-            batch_neg = dataset.get_sg_negatives(
-                shape = (len(batch_pos),),
+            pos_source = pos_sample[:, 0].reshape(-1).to('cuda')
+            pos_target = pos_sample[:, 1:].reshape(-1).to('cuda')
+            
+            # neg_source = dataset.get_sg_negatives(
+            #     shape = (len(pos_source)*5,),
+            #     alpha = 0.0).to('cuda')
+            neg_source = pos_source.repeat_interleave(1)
+            neg_target = dataset.get_sg_negatives(
+                shape = (len(pos_source),),
                 alpha = 0.0).to('cuda')
-            batch_users = pos_sample[:, 0].reshape(-1).to('cuda')
 
-            classifier_loss = loss_obj.CrossEntropyLoss(batch_users, batch_pos, batch_neg)
+            classifier_loss = loss_obj.CrossEntropyLoss(pos_source, pos_target, neg_source, neg_target)
             if world.tensorboard and plot:
                 writer.add_scalar(f'Loss/classifier_loss', classifier_loss, epoch * total_batch + batch_i)
             batch_i += 1

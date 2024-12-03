@@ -18,6 +18,8 @@ print(">>SEED:", world.seed)
 import register
 from register import dataset
 
+train_mlp_epochs = []
+
 sg_model = SGModel(world.config, dataset)
 sg_model = sg_model.to(world.device)
 
@@ -58,9 +60,6 @@ try:
 	if not world.BYPASS_SKIPGRAM:
 		completed_batches = 0
 		for epoch in range(1, world.TRAIN_epochs + 1):
-			if epoch % 1 == 0:
-				Procedure.test(dataset, sg_model, epoch, w, use_classifier=False)
-
 			start = time.time()
 			if world.GPU:
 				torch.cuda.reset_peak_memory_stats()
@@ -77,12 +76,15 @@ try:
 				writer=w)
 			print(f'EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}')
 
-
-
+			if epoch in train_mlp_epochs:
+				plot = (epoch == world.TRAIN_epochs)
+				Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=plot)
+				Procedure.test(dataset, sg_model, epoch, w, use_classifier=True)
+				torch.save(sg_model.state_dict(), weight_file)
 			# print(prof.key_averages().table(sort_by="self_cuda_memory_usage", row_limit=10))
 
-	Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=True)
-	torch.save(sg_model.state_dict(), weight_file)
+	# Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=True)
+	# torch.save(sg_model.state_dict(), weight_file)
 finally:
 	if world.tensorboard:
 		w.close()

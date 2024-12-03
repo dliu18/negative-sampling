@@ -27,6 +27,7 @@ config = {}
 
 config['base_model'] = args.base_model
 config['test_set'] = args.test_set
+config['test_set_frac'] = args.test_set_frac
 config['batch_size'] = args.batch_size
 config['latent_dim_rec'] = args.recdim
 config['dropout'] = args.dropout

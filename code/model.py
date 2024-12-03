@@ -25,7 +25,7 @@ class SGModel(BasicModel):
         super(SGModel, self).__init__()
         self.num_users  = dataset.n_users
         self.latent_dim = config['latent_dim_rec']
-        self.lam = config["lambda"]
+        self.lam = config["lambda"] / self.num_users
         self.alpha = config["alpha"]
         self.degrees = dataset.get_degrees()
         self.device = world.device

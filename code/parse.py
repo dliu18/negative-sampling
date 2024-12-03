@@ -9,6 +9,8 @@ def parse_args():
                         help="base model to use between 'n2v' or 'line'")
     parser.add_argument('--test_set', type=str,default="test",
                         help="Is either 'test' or 'valid' i.e. validation")
+    parser.add_argument('--test_set_frac', type=float,default=0.2,
+                        help="Size of the test set split, as a fraction of the original dataset")
     parser.add_argument('--lam', type=float,default=1.0,
                         help="dimension regularization hyperparameter")
     parser.add_argument('--batch_size', type=int,default=128,

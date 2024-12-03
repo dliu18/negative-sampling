@@ -21,9 +21,10 @@ NUM_HITS_NEGATIVES = int(1e5)
 NUM_MRR_NEGATIVES = int(1e3)
 
 class BasicDataset(Dataset):
-    def __init__(self, name, seed=0):
+    def __init__(self, name, test_set, seed=0):
         self.name = name
         self.seed = seed
+        self.test_set = test_set
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         print("init dataset: ", self.name, " device: ", self.device)
     
@@ -115,8 +116,8 @@ class SmallBenchmark(BasicDataset):
     '''
     Class for the Cora, CiteSeer, and PubMed datasets.
     '''
-    def __init__(self, name, seed):
-        super().__init__(name, seed)
+    def __init__(self, name, test_set, test_set_frac, seed):
+        super().__init__(name, test_set, seed)
 
         assert name in ["Cora", "CiteSeer", "PubMed", "ego-facebook", "soc-ca-astroph"] or "SBM" in name
 
@@ -147,7 +148,7 @@ class SmallBenchmark(BasicDataset):
 
         split = RandomLinkSplit(is_undirected=data.is_undirected(),
             num_val = 0.1,
-            num_test = 0.2,
+            num_test = test_set_frac,
             add_negative_train_samples = False
         )
 
@@ -170,6 +171,8 @@ class SmallBenchmark(BasicDataset):
         assert reconstructed.shape == data.edge_index.shape
         assert (reconstructed.sum(dim=1) == data.edge_index.sum(dim=1)).all()
 
+        if test_set == "test":
+            self.train_edges = torch.cat([self.train_edges, self.valid_edges], dim=1)
         self.degrees = degree(self.train_edges[0], num_nodes=data.num_nodes).to(self.device)
 
         generator = torch.Generator(device='cpu')
@@ -285,8 +288,8 @@ class OGBBenchmark(BasicDataset):
     '''
     Class for the OGB link prediction datsets
     '''
-    def __init__(self, name, seed):
-        super().__init__(name, seed)
+    def __init__(self, name, test_set, seed):
+        super().__init__(name, test_set, seed)
 
         assert name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]
         dataset = PygLinkPropPredDataset(name=name)
@@ -317,6 +320,9 @@ class OGBBenchmark(BasicDataset):
         else:
             raise NotImplementedError("OGB dataset does not have correct schema: ",
                 self.split_edge['train'].keys())
+
+        if test_set == "test":
+            self.train_edges = torch.cat([self.train_edges, self.valid_edges], dim=1)
 
         self.degrees = degree(self.train_edges.reshape(-1)).to(self.device)
         generator = torch.Generator(device='cpu')
