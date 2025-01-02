@@ -116,7 +116,7 @@ class SmallBenchmark(BasicDataset):
     '''
     Class for the Cora, CiteSeer, and PubMed datasets.
     '''
-    def __init__(self, name, test_set, test_set_frac, seed):
+    def __init__(self, name, test_set="test", test_set_frac=0.2, seed=2020):
         super().__init__(name, test_set, seed)
 
         assert name in ["Cora", "CiteSeer", "PubMed", "ego-facebook", "soc-ca-astroph"] or "SBM" in name
@@ -288,7 +288,7 @@ class OGBBenchmark(BasicDataset):
     '''
     Class for the OGB link prediction datsets
     '''
-    def __init__(self, name, test_set, seed):
+    def __init__(self, name, test_set="test", seed=2020):
         super().__init__(name, test_set, seed)
 
         assert name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]

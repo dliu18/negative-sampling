@@ -14,7 +14,7 @@ plt.rcParams.update({
 })
 
 if __name__ == "__main__":
-	df = pd.read_csv("../outputs/9-25-eval-aggregated.csv")
+	df = pd.read_csv("../outputs/post-rebuttal/summary-post-rebuttal-mlp-filtered.csv")
 	df["AUC-ROC"] = df["metrics/test/AUC_ROC"]
 	df["MRR"] = df["metrics/test/MRR"]
 	df["Hits@k"] = df["metrics/test/Hits_50"]
@@ -29,11 +29,14 @@ if __name__ == "__main__":
 	fig, axs = plt.subplots(ncols = 3, figsize = (18, 5), sharex = True, sharey = True)
 
 	for name in ["Cora", "CiteSeer", "PubMed"]:
-		dataset = SmallBenchmark(name, seed = 2020)
+		dataset = SmallBenchmark(name, seed = 2020, test_set="test", test_set_frac=0.2)
 		avg_clustering = np.mean(dataset.get_clustering_coefs())
 
-		orig_metrics = df.loc[name, "sg", 10]
-		no_neg_metrics = df.loc[name, "sg_aug", 1000000000]
+		try:
+			orig_metrics = df.loc[name, "sg", 10]
+			no_neg_metrics = df.loc[name, "sg_aug", 1000000000]
+		except:
+			continue
 
 		auc_gain = (no_neg_metrics["AUC-ROC"] - orig_metrics["AUC-ROC"]) 
 		if not np.isnan(auc_gain):
@@ -49,11 +52,14 @@ if __name__ == "__main__":
 
 
 	for name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]:
-		dataset = OGBBenchmark(name, seed = 2020)
+		dataset = OGBBenchmark(name, seed = 2020, test_set="test")
 		avg_clustering = np.mean(dataset.get_clustering_coefs())
 
-		orig_metrics = df.loc[name, "sg", 10]
-		no_neg_metrics = df.loc[name, "sg_aug", 1000000000]
+		try:
+			orig_metrics = df.loc[name, "sg", 10]
+			no_neg_metrics = df.loc[name, "sg_aug", 1000000000]
+		except:
+			continue
 
 		auc_gain = (no_neg_metrics["AUC-ROC"] - orig_metrics["AUC-ROC"])
 		if not np.isnan(auc_gain): 
@@ -78,4 +84,4 @@ if __name__ == "__main__":
 	fig.legend(handles, labels, bbox_to_anchor = (0.5, 1.15), loc='upper center', ncols = len(labels))
 	fig.subplots_adjust(top=0.97)
 
-	fig.savefig("../figs/agg_performance_by_clustering_coef.pdf", bbox_inches="tight")
+	fig.savefig("../figs/post-rebuttal/agg_performance_by_clustering_coef.pdf", bbox_inches="tight")

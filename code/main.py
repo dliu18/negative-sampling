@@ -18,7 +18,7 @@ print(">>SEED:", world.seed)
 import register
 from register import dataset
 
-train_mlp_epochs = []
+train_mlp_epochs = [1, 5, 10, 15, 20]
 
 sg_model = SGModel(world.config, dataset)
 sg_model = sg_model.to(world.device)
@@ -76,12 +76,17 @@ try:
 				writer=w)
 			print(f'EPOCH[{epoch}/{world.TRAIN_epochs}] {output_information}')
 
-			if epoch in train_mlp_epochs:
+			if epoch in train_mlp_epochs and world.config["test_set"] == "valid":
 				plot = (epoch == world.TRAIN_epochs)
 				Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=plot)
 				Procedure.test(dataset, sg_model, epoch, w, use_classifier=True)
 				torch.save(sg_model.state_dict(), weight_file)
 			# print(prof.key_averages().table(sort_by="self_cuda_memory_usage", row_limit=10))
+
+	if world.config["test_set"] == "test" or world.TRAIN_epochs not in train_mlp_epochs:
+		Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=True)
+		Procedure.test(dataset, sg_model, epoch, w, use_classifier=True)
+		torch.save(sg_model.state_dict(), weight_file)
 
 	# Procedure.train_edge_classifier(dataset, sg_model, loss_obj, writer=w, plot=True)
 	# torch.save(sg_model.state_dict(), weight_file)

@@ -58,7 +58,7 @@ def train(dataset, sg_model, loss_obj, epoch, completed_batches, writer=None):
     aver_loss = aver_loss / total_batch
     return f"loss: {aver_loss:,}", completed_batches
     
-def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=25, plot=False):
+def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=5, plot=False):
     sg_model.train()
     sg_model.freeze_embeddings()
     loss_obj.reset_classifier_optimization()

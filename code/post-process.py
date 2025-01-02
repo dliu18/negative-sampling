@@ -18,7 +18,7 @@ datasets = ["Cora", "CiteSeer", "PubMed", "ogbl-collab", "ogbl-ppa", "ogbl-citat
 
 metrics = ["Hits@K", "MRR"]
 test_set = "test"
-base_model = "n2v"
+base_model = "line"
 K = 50
 
 def color(name):
@@ -54,28 +54,28 @@ def get_loss_func_name(name):
 def get_n_negative(dataset_name, base_model, loss_func):
     n_negative_dict = {
         "Cora": {
-            "line": 1000,
+            "line": 100,
             "n2v": 10
         },
         "CiteSeer": {
-            "line": 1000,
-            "n2v": 10
-        },
-        "PubMed": {
-            "line": 1000, 
-            "n2v": 1000
-        },
-        "ogbl-collab": {
-            "line": 1000,
+            "line": 100,
             "n2v": 100
         },
+        "PubMed": {
+            "line": 100, 
+            "n2v": 100
+        },
+        "ogbl-collab": {
+            "line": 10,
+            "n2v": 10
+        },
         "ogbl-ppa": {
-            "line": 1000,
-            "n2v": 5
+            "line": 10,
+            "n2v": 10
         },
         "ogbl-citation2": {
-            "line": 1000,
-            "n2v": 1000
+            "line": 10,
+            "n2v": 10
         }
     }
     if loss_func == "sg":
@@ -104,7 +104,8 @@ if __name__ == "__main__":
         sg_model = SGModel(world.config, dataset)
         sg_model = sg_model.to(world.device)
 
-        for loss_func in ["sg", "sg_weighted", "sg_aug", "sg_aug_weighted", "no_neg"]:
+        # for loss_func in ["sg", "sg_weighted", "sg_aug", "sg_aug_weighted", "no_neg"]:
+        for loss_func in ["sg", "sg_aug", "no_neg"]:
             print(f"{base_model} {loss_func}")
             n_negative = get_n_negative(dataset_name, base_model, loss_func)
             loss_func_name = get_loss_func_name(loss_func)
@@ -151,4 +152,4 @@ if __name__ == "__main__":
             axs[r][c].set_ylabel(metrics[r])
             axs[r][c].set_title(datasets[c])
             # axs[r][c].set_xscale("log")
-    plt.savefig(f"../figs/metrics_by_clustering_coef_{base_model}.pdf", bbox_inches="tight")
+    plt.savefig(f"../figs/post-rebuttal/metrics_by_clustering_coef_{base_model}.pdf", bbox_inches="tight")

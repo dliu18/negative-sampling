@@ -12,13 +12,14 @@ plt.rcParams.update({
     'legend.fontsize': 12   # Legend font size
 })
 
-key = "metrics/test/AUC_ROC max"
+key = "metrics/test/AUC_ROC"
 if __name__ == "__main__":
 	fig, ax = plt.subplots()
 
 	# df = pd.read_csv("../../outputs/summary-sbm-final.csv")
-	df = pd.read_csv("../outputs/summary-sbm-line-extended.csv")
+	df = pd.read_csv("../outputs/post-rebuttal/summary-sbm-line-extended-mlp.csv")
 
+	df = df[df['Model'] == 'line']
 	df["p"] = [float(row.split("-")[1]) for row in df["Graph"]]
 	df["q"] = [float(row.split("-")[2]) for row in df["Graph"]]
 	df["p/q"] = df["p"] / df["q"]
@@ -64,4 +65,4 @@ if __name__ == "__main__":
 	ax.set_xlabel("Within-block / Between-block edge probability")
 	ax.set_ylabel("AUC-ROC")
 	ax.set_xscale("log")
-	fig.savefig("../figs/sbm_series-line-extended.pdf", bbox_inches = "tight")	
+	fig.savefig("../figs/post-rebuttal/sbm_series-line.pdf", bbox_inches = "tight")	

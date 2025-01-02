@@ -32,13 +32,13 @@ def get_last_metric_values_and_duration(event_file):
     
     # Calculate the duration based on timestamps
     if timestamps:
-        duration = int(max(timestamps) - min(timestamps))
+        duration = float(max(timestamps) - min(timestamps))
         duration = f"{duration}"
     else:
         duration = 0
 
     # Extract the final step value for "metrics/MRR"
-    mrr_final_step = final_steps.get("metrics/test/AUC_ROC", None)
+    mrr_final_step = final_steps.get("Loss/total_loss", None)
     
     return last_values, duration, mrr_final_step
 
@@ -62,7 +62,8 @@ def create_csv_summary(log_directory, output_csv):
             "Loss Function": loss_func,
             "n_negative": n_negative,
             "Learning Rate": lr,
-            'lambda': lam
+            'lambda': lam,
+            'time': event_file.split('/')[9]
         }
         last_values, duration, mrr_final_step = get_last_metric_values_and_duration(event_file)
         length = {'Duration': duration, 'Steps': mrr_final_step}
