@@ -1,3 +1,4 @@
+import world
 import pandas as pd
 import matplotlib.pyplot as plt
 from dataloader import SmallBenchmark
@@ -13,13 +14,17 @@ plt.rcParams.update({
 })
 
 key = "metrics/test/AUC_ROC"
+alg = world.config["base_model"]
+assert alg in ["n2v", "line"]
+alg_display_name = "node2vec" if alg=="n2v" else "line"
+
 if __name__ == "__main__":
 	fig, ax = plt.subplots()
 
 	# df = pd.read_csv("../../outputs/summary-sbm-final.csv")
-	df = pd.read_csv("../outputs/post-rebuttal/summary-sbm-line-extended-mlp.csv")
+	df = pd.read_csv("../outputs/post-rebuttal/summary-sbm-ratio.csv")
 
-	df = df[df['Model'] == 'line']
+	df = df[df['Model'] == alg]
 	df["p"] = [float(row.split("-")[1]) for row in df["Graph"]]
 	df["q"] = [float(row.split("-")[2]) for row in df["Graph"]]
 	df["p/q"] = df["p"] / df["q"]
@@ -38,7 +43,7 @@ if __name__ == "__main__":
 	mask = (df["Loss Function"] == "sg") & (df["n_negative"] >= 0)
 	x = df[mask]["p/q"]
 	y = df[mask][key]
-	ax.plot(x, y, label = "LINE I", color = "#377eb8", linewidth = 2)
+	ax.plot(x, y, label = f"{alg_display_name} I", color = "#377eb8", linewidth = 2)
 
 	# mask = (df["Loss Function"] == "sg") & (df["n_negative"] == -1)
 	# x = df[mask]["q/p"]
@@ -48,7 +53,7 @@ if __name__ == "__main__":
 	mask = (df["Loss Function"] == "sg_aug") & (df["n_negative"] <= 1000)
 	x = df[mask]["p/q"]
 	y = df[mask][key]
-	ax.plot(x, y, label = "LINE II", color = "#984ea3", linewidth = 2)
+	ax.plot(x, y, label = f"{alg_display_name} II", color = "#984ea3", linewidth = 2)
 
 	# mask = (df["Loss Function"] == "sg_aug") & (df["n_negative"] == -1)
 	# x = df[mask]["q/p"]
@@ -58,11 +63,12 @@ if __name__ == "__main__":
 	mask = (df["Loss Function"] == "sg_aug") & (df["n_negative"] == 1000000000)
 	x = df[mask]["p/q"]
 	y = df[mask][key]
-	ax.plot(x, y, label = "LINE II" + r"$^0$", color = "#4daf4a", linewidth = 2)
+	ax.plot(x, y, label = f"{alg_display_name} II" + r"$^0$", color = "#4daf4a", linewidth = 2)
 
 	ax.legend()
 	ax.grid()
 	ax.set_xlabel("Within-block / Between-block edge probability")
+	# ax.set_xlabel("Within-block edge probability")
 	ax.set_ylabel("AUC-ROC")
 	ax.set_xscale("log")
-	fig.savefig("../figs/post-rebuttal/sbm_series-line.pdf", bbox_inches = "tight")	
+	fig.savefig(f"../figs/post-rebuttal/sbm_series-ratio-{alg}.pdf", bbox_inches = "tight")	

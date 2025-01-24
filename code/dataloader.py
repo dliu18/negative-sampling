@@ -129,14 +129,16 @@ class SmallBenchmark(BasicDataset):
             )
         elif "SBM" in name:
             _, p, q = name.split("-")
+            blocks = 2
             p = float(p)
             q = float(q)
-            B = q * torch.ones(2, 2) + (p - q) * torch.eye(2)
+            B = q * torch.ones(blocks, blocks) + (p - q) * torch.eye(blocks)
             dataset = StochasticBlockModelDataset(
-                root = "dataset/",
-                block_sizes = torch.tensor([1000, 1000]),
+                root = "/work/radlab/David/pyg",
+                block_sizes = [1000] * blocks,
                 edge_probs = B,
-                is_undirected = True)
+                is_undirected = True,
+                force_reload = True) #PyG stores edge prob rounded to 1 decimal point in fileanme so must reload
         elif name in ["ego-facebook", "soc-ca-astroph"]:
             dataset = SNAPDataset(
                 root = "dataset/",
