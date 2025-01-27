@@ -6,7 +6,7 @@
 graphs=("Cora" "CiteSeer" "PubMed")
 base_models=("n2v" "line")
 test_set_fracs=(0.85 0.65 0.45 0.25)
-n_negatives=(10 100 1000 1000000000)
+n_negatives=(10 100 1000000000)
 lams=(0.1 1 10 100)
 
 # graphs=("Cora" "CiteSeer" "PubMed")
@@ -29,7 +29,7 @@ for dataset in "${graphs[@]}"; do
             --recdim=128 \
             --batch_size=128 \
             --epochs=20\
-            --board_path="density"
+            --board_path="density-jan-2"
 
             for n_negative in "${n_negatives[@]}"; do
                 for lam in "${lams[@]}"; do
@@ -46,7 +46,7 @@ for dataset in "${graphs[@]}"; do
                     --recdim=128 \
                     --batch_size=128 \
                     --epochs=20\
-                    --board_path="density"
+                    --board_path="density-jan-2"
                 done        
             done 
         done

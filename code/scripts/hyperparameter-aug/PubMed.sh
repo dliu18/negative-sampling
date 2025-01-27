@@ -9,8 +9,8 @@ python main.py \
 --dataset="PubMed" \
 --recdim=128 \
 --batch_size=128 \
---epochs=20 \
---board_path="post-rebuttal-mlp"
+--epochs=50 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="n2v" \
@@ -21,40 +21,40 @@ python main.py \
 --dataset="PubMed" \
 --recdim=128 \
 --batch_size=128 \
---epochs=20 \
+--epochs=50 \
 --n_negative=-1 \
 --alpha=0.75 \
 --K=5 \
---board_path="post-rebuttal-mlp"
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="n2v" \
 --loss_func="sg_aug" \
 --test_set="test" \
---n_negative=100 \
+--n_negative=1000 \
 --lr=0.1 \
---lam=100 \
+--lam=0.1 \
 --seed=2020 \
 --dataset="PubMed" \
 --recdim=128 \
 --batch_size=128 \
---epochs=20 \
---board_path="post-rebuttal-mlp"
+--epochs=50 \
+--board_path="9-25-auc"
 
-# python main.py \
-# --base_model="n2v" \
-# --loss_func="sg_aug" \
-# --test_set="test" \
-# --n_negative=1000 \
-# --lr=0.1 \
-# --lam=0.1 \
-# --alpha=0.75 \
-# --seed=2020 \
-# --dataset="PubMed" \
-# --recdim=128 \
-# --batch_size=128 \
-# --epochs=1 \
-# --board_path="post-rebuttal-mlp-weighted"
+python main.py \
+--base_model="n2v" \
+--loss_func="sg_aug" \
+--test_set="test" \
+--n_negative=1000 \
+--lr=0.1 \
+--lam=0.1 \
+--alpha=0.75 \
+--seed=2020 \
+--dataset="PubMed" \
+--recdim=128 \
+--batch_size=128 \
+--epochs=50 \
+--board_path="9-25-weighted"
 
 python main.py \
 --base_model="n2v" \
@@ -62,12 +62,13 @@ python main.py \
 --test_set="test" \
 --n_negative=1000000000 \
 --lr=0.1 \
+--lam=0.1 \
 --seed=2020 \
 --dataset="PubMed" \
 --recdim=128 \
 --batch_size=128 \
---epochs=2 \
---board_path="post-rebuttal-mlp"
+--epochs=50 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="line" \
@@ -77,9 +78,9 @@ python main.py \
 --seed=2020 \
 --dataset="PubMed" \
 --recdim=128 \
---batch_size=128 \
---epochs=20 \
---board_path="post-rebuttal-mlp"
+--batch_size=32 \
+--epochs=50 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="line" \
@@ -89,55 +90,41 @@ python main.py \
 --seed=2020 \
 --dataset="PubMed" \
 --recdim=128 \
---batch_size=128 \
---epochs=20 \
+--batch_size=32 \
+--epochs=50 \
 --n_negative=-1 \
 --alpha=0.75 \
 --K=5 \
---board_path="post-rebuttal-mlp"
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="line" \
 --loss_func="sg_aug" \
 --test_set="test" \
---n_negative=1 \
+--n_negative=1000 \
 --lr=0.1 \
---lam=1 \
+--lam=0.01 \
 --seed=2020 \
 --dataset="PubMed" \
 --recdim=128 \
---batch_size=128 \
---epochs=20 \
---board_path="post-rebuttal-mlp"
+--batch_size=32 \
+--epochs=50 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="line" \
 --loss_func="sg_aug" \
 --test_set="test" \
---n_negative=100 \
+--n_negative=1000 \
 --lr=0.1 \
---lam=1 \
+--lam=0.01 \
+--alpha=0.75 \
 --seed=2020 \
 --dataset="PubMed" \
 --recdim=128 \
---batch_size=128 \
---epochs=20 \
---board_path="post-rebuttal-mlp"
-
-# python main.py \
-# --base_model="line" \
-# --loss_func="sg_aug" \
-# --test_set="test" \
-# --n_negative=1000 \
-# --lr=0.1 \
-# --lam=0.01 \
-# --alpha=0.75 \
-# --seed=2020 \
-# --dataset="PubMed" \
-# --recdim=128 \
-# --batch_size=32 \
-# --epochs=2 \
-# --board_path="post-rebuttal-mlp-weighted"
+--batch_size=32 \
+--epochs=50 \
+--board_path="9-25-weighted"
 
 python main.py \
 --base_model="line" \
@@ -145,9 +132,10 @@ python main.py \
 --test_set="test" \
 --n_negative=1000000000 \
 --lr=0.1 \
+--lam=0.01 \
 --seed=2020 \
 --dataset="PubMed" \
 --recdim=128 \
---batch_size=128 \
---epochs=2 \
---board_path="post-rebuttal-mlp"
+--batch_size=32 \
+--epochs=50 \
+--board_path="9-25-auc"

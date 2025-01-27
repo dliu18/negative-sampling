@@ -9,8 +9,8 @@ python main.py \
 --dataset="ogbl-collab" \
 --recdim=128 \
 --batch_size=1024 \
---epochs=5 \
---board_path="post-rebuttal-mlp"
+--epochs=10 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="n2v" \
@@ -24,37 +24,37 @@ python main.py \
 --dataset="ogbl-collab" \
 --recdim=128 \
 --batch_size=1024 \
---epochs=5 \
---board_path="post-rebuttal-mlp"
+--epochs=10 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="n2v" \
 --loss_func="sg_aug" \
 --test_set="test" \
---n_negative=10 \
+--n_negative=100 \
 --lr=0.1 \
---lam=100 \
+--lam=0.01 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
 --batch_size=1024 \
---epochs=5 \
---board_path="post-rebuttal-mlp"
+--epochs=10 \
+--board_path="9-25-auc"
 
-# python main.py \
-# --base_model="n2v" \
-# --loss_func="sg_aug" \
-# --test_set="test" \
-# --n_negative=100 \
-# --lr=0.1 \
-# --lam=0.01 \
-# --alpha=0.75 \
-# --seed=2020 \
-# --dataset="ogbl-collab" \
-# --recdim=128 \
-# --batch_size=1024 \
-# --epochs=3 \
-# --board_path="post-rebuttal-mlp-weighted"
+python main.py \
+--base_model="n2v" \
+--loss_func="sg_aug" \
+--test_set="test" \
+--n_negative=100 \
+--lr=0.1 \
+--lam=0.01 \
+--alpha=0.75 \
+--seed=2020 \
+--dataset="ogbl-collab" \
+--recdim=128 \
+--batch_size=1024 \
+--epochs=10 \
+--board_path="9-25-weighted"
 
 python main.py \
 --base_model="n2v" \
@@ -62,12 +62,13 @@ python main.py \
 --test_set="test" \
 --n_negative=1000000000 \
 --lr=0.1 \
+--lam=0.01 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
 --batch_size=1024 \
---epochs=2 \
---board_path="post-rebuttal-mlp"
+--epochs=10 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="line" \
@@ -77,9 +78,9 @@ python main.py \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
---batch_size=1024 \
---epochs=5 \
---board_path="post-rebuttal-mlp"
+--batch_size=32 \
+--epochs=10 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="line" \
@@ -92,52 +93,38 @@ python main.py \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
---batch_size=1024 \
---epochs=5 \
---board_path="post-rebuttal-mlp"
+--batch_size=32 \
+--epochs=10 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="line" \
 --loss_func="sg_aug" \
 --test_set="test" \
---n_negative=1 \
+--n_negative=1000 \
 --lr=0.1 \
---lam=1 \
+--lam=0.01 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
---batch_size=1024 \
---epochs=5 \
---board_path="post-rebuttal-mlp"
+--batch_size=32 \
+--epochs=10 \
+--board_path="9-25-auc"
 
 python main.py \
 --base_model="line" \
 --loss_func="sg_aug" \
 --test_set="test" \
---n_negative=10 \
+--n_negative=1000 \
 --lr=0.1 \
---lam=10 \
+--lam=0.01 \
+--alpha=0.75 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
---batch_size=1024 \
---epochs=5 \
---board_path="post-rebuttal-mlp"
-
-# python main.py \
-# --base_model="line" \
-# --loss_func="sg_aug" \
-# --test_set="test" \
-# --n_negative=1000 \
-# --lr=0.1 \
-# --lam=0.001 \
-# --alpha=0.75 \
-# --seed=2020 \
-# --dataset="ogbl-collab" \
-# --recdim=128 \
-# --batch_size=32 \
-# --epochs=10 \
-# --board_path="post-rebuttal-mlp-weighted"
+--batch_size=32 \
+--epochs=10 \
+--board_path="9-25-weighted"
 
 python main.py \
 --base_model="line" \
@@ -145,9 +132,10 @@ python main.py \
 --test_set="test" \
 --n_negative=1000000000 \
 --lr=0.1 \
+--lam=0.01 \
 --seed=2020 \
 --dataset="ogbl-collab" \
 --recdim=128 \
---batch_size=1024 \
---epochs=2 \
---board_path="post-rebuttal-mlp"
+--batch_size=32 \
+--epochs=10 \
+--board_path="9-25-auc"
