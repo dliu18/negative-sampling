@@ -55,15 +55,17 @@ def create_csv_summary(log_directory, output_csv):
     rows = []
 
     for event_file in tqdm(event_files):
-        graph_name, base_model, loss_func, n_negative, lr, lam = event_file.split('/')[2:8]
+        graph_name, base_model, loss_func, n_negative, lr, lam, n2v_p, n2v_q, time = event_file.split('/')[2:11]
         trial_info = {
             "Graph": graph_name,
             "Model": base_model,
             "Loss Function": loss_func,
             "n_negative": n_negative,
             "Learning Rate": lr,
-            'lambda': lam,
-            'time': event_file.split('/')[9]
+            "lambda": lam,
+            "n2v_p": n2v_p,
+            "n2v_q": n2v_q,
+            'time': time
         }
         last_values, duration, mrr_final_step = get_last_metric_values_and_duration(event_file)
         length = {'Duration': duration, 'Steps': mrr_final_step}

@@ -216,13 +216,14 @@ class SmallBenchmark(BasicDataset):
             return cluster_coefs
 
 
-    def get_train_loader_rw(self, batch_size, sample_negatives):
+    def get_train_loader_rw(self, batch_size, sample_negatives, p=1.0, q=1.0):
         model = Node2Vec(self.train_edges, 
                     embedding_dim=128, # set as a placeholder but the embeddings in here are not used
                      walk_length=60,
                      context_size=20,
                      walks_per_node = 10,
-                     num_negative_samples= 1 if sample_negatives else 0
+                     num_negative_samples= 1 if sample_negatives else 0,
+                     p=p, q=q
                 ).to(self.device)
 
         loader = model.loader(batch_size=batch_size, shuffle=True, num_workers=1)
@@ -293,7 +294,7 @@ class OGBBenchmark(BasicDataset):
     def __init__(self, name, test_set="test", seed=2020):
         super().__init__(name, test_set, seed)
 
-        assert name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]
+        assert name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2", "ogbl-vessel"]
         dataset = PygLinkPropPredDataset(name=name)
         data = dataset[0]
         self.full_data = data
@@ -365,7 +366,7 @@ class OGBBenchmark(BasicDataset):
             np.save(f"dataset/cluster/{self.name}_cluster_coefs.npy", cluster_coefs)
             return cluster_coefs
 
-    def get_train_loader_rw(self, batch_size, sample_negatives):
+    def get_train_loader_rw(self, batch_size, sample_negatives, p=1.0, q=1.0):
         edges = self.train_edges
         #if the graph is undirected we need to add in the bidirectional edges since OGB does not include them in split_edge
         if self.full_data.is_undirected():
@@ -375,7 +376,8 @@ class OGBBenchmark(BasicDataset):
                      walk_length=40,
                      context_size=20,
                      walks_per_node = 10,
-                     num_negative_samples= 1 if sample_negatives else 0
+                     num_negative_samples= 1 if sample_negatives else 0,
+                     p=p, q=q
                 ).to(self.device)
 
         loader = model.loader(batch_size=batch_size, shuffle=True, num_workers=1)

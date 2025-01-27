@@ -49,6 +49,8 @@ if world.tensorboard:
 		str(world.config["n_negative"]),
 		str(world.config["lr"]),
 		str(world.config["lambda"]),
+		str(world.config["n2v_p"]),
+		str(world.config["n2v_q"]),
 		time.strftime("%m-%d-%Hh%Mm")
 		)
 	w : SummaryWriter = SummaryWriter(filename)

@@ -25,7 +25,9 @@ def train(dataset, sg_model, loss_obj, epoch, completed_batches, writer=None):
     if world.config["base_model"] == 'n2v':
         loader = dataset.get_train_loader_rw(
             batch_size = world.config['batch_size'], 
-            sample_negatives = True)
+            sample_negatives = True,
+            p=world.config["n2v_p"],
+            q=world.config["n2v_q"])
     elif world.config["base_model"] == 'line':
         loader = dataset.get_train_loader_edges(
             batch_size = world.config['batch_size'], 
@@ -126,9 +128,9 @@ def test(dataset, sg_model, epoch, writer, prefix="", print_result=True, use_cla
                 writer.add_scalar(prefix + f'metrics/{test_set}/{label}', all_mrr.mean(), epoch)
 
         # test Hits@k
-        K = 50
-        label, all_hits = Evaluator.test_hits(sg_model, K, dataset, test_set, use_classifier)
-        if print_result:
-            print(f'Hits@{K}: {all_hits.mean():.4f}')
-        if writer:
-            writer.add_scalar(prefix + f'metrics/{test_set}/{label}', all_hits.mean(), epoch)
+        for K in [20, 50, 100]:
+            label, all_hits = Evaluator.test_hits(sg_model, K, dataset, test_set, use_classifier)
+            if print_result:
+                print(f'Hits@{K}: {all_hits.mean():.4f}')
+            if writer:
+                writer.add_scalar(prefix + f'metrics/{test_set}/{label}', all_hits.mean(), epoch)

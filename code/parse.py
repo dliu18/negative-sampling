@@ -39,6 +39,10 @@ def parse_args():
                         help="path to save tensorboard logs within runs/")
     parser.add_argument('--n_negative', type=int,default=10,
                         help="Cadence (in epochs) at which the dimension regularization is applied.")
+    parser.add_argument('--n2v_p', type=float,default=1.0,
+                        help="p hyperparameter for n2v random walks. Small values encourage local exploration.")
+    parser.add_argument('--n2v_q', type=float,default=1.0,
+                        help="q hyperparameter for n2v random walks. Small values encourage distant (DFS) exploration.")
     parser.add_argument('--comment', type=str,default="")
     parser.add_argument('--load', type=int,default=0)
     parser.add_argument('--bypass_skipgram', type=bool,default=False)

@@ -42,6 +42,8 @@ config['bigdata'] = False
 config["loss_func"] = args.loss_func
 config["lambda"] = args.lam
 config["n_negative"] = args.n_negative
+config["n2v_p"] = args.n2v_p
+config["n2v_q"] = args.n2v_q
 
 GPU = torch.cuda.is_available()
 device = torch.device('cuda' if GPU else "cpu")
