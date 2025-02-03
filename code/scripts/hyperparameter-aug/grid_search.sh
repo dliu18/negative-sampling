@@ -5,15 +5,17 @@
 dataset="$1"
 epochs="$2"
 classifier_epochs="$3"
-lr="$4"
+batch_size="$4"
 n2v_p="$7"
 n2v_q="$8"
 board_path="$9"
 
-base_models=("n2v" "line")
-loss_funcs=("sg" "sg_aug")
+# base_models=("n2v" "line")
+base_models=("line")
+loss_funcs=("sg_aug")
 
-n_negatives=(1 5 10 100 1000000000)
+# n_negatives=(1 5 10 100)
+n_negatives=(100)
 lams=(100.0 10.0 1.0 0.1)
 
 # Iterate over all combinations of base_model and loss_func
@@ -21,9 +23,9 @@ for base_model in "${base_models[@]}"; do
     for loss_func in "${loss_funcs[@]}"; do
         # Set batch_size based on the base_model
         if [ "$base_model" == "n2v" ]; then
-            batch_size="$5"
+            lr="$5"
         elif [ "$base_model" == "line" ]; then
-            batch_size="$6"
+            lr="$6"
         else
             echo "Unknown base_model: $base_model"
             continue
@@ -51,6 +53,5 @@ for base_model in "${base_models[@]}"; do
                 --board_path="$board_path"
             done
         done
-        fi
     done
 done

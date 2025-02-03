@@ -54,6 +54,7 @@ dataset = args.dataset
 
 
 TRAIN_epochs = args.epochs
+CLASSIFIER_epochs = args.classifier_epochs
 BYPASS_SKIPGRAM = args.bypass_skipgram
 LOAD = args.load
 PATH = args.path

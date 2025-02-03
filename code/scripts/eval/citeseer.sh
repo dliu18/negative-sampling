@@ -5,12 +5,14 @@ python main.py \
 --loss_func="sg" \
 --test_set="test" \
 --lr=0.1 \
+--n2v_p=1 \
+--n2v_q=0.5 \
 --seed=2020 \
 --dataset="CiteSeer" \
 --recdim=128 \
 --batch_size=128 \
 --epochs=20 \
---board_path="post-rebuttal-mlp"
+--board_path="jan-29"
 
 python main.py \
 --base_model="n2v" \
@@ -20,12 +22,14 @@ python main.py \
 --alpha=0.75 \
 --K=5 \
 --lr=0.1 \
+--n2v_p=1 \
+--n2v_q=0.5 \
 --seed=2020 \
 --dataset="CiteSeer" \
 --recdim=128 \
 --batch_size=128 \
 --epochs=20 \
---board_path="post-rebuttal-mlp"
+--board_path="jan-29"
 
 python main.py \
 --base_model="n2v" \
@@ -34,27 +38,15 @@ python main.py \
 --n_negative=100 \
 --lr=0.1 \
 --lam=100 \
+--n2v_p=1 \
+--n2v_q=0.5 \
 --seed=2020 \
 --dataset="CiteSeer" \
 --recdim=128 \
 --batch_size=128 \
 --epochs=20 \
---board_path="post-rebuttal-mlp"
+--board_path="jan-29"
 
-# python main.py \
-# --base_model="n2v" \
-# --loss_func="sg_aug" \
-# --test_set="test" \
-# --n_negative=10 \
-# --lr=0.1 \
-# --lam=0.1 \
-# --alpha=0.75 \
-# --seed=2020 \
-# --dataset="CiteSeer" \
-# --recdim=128 \
-# --batch_size=128 \
-# --epochs=10 \
-# --board_path="post-rebuttal-mlp-weighted"
 
 python main.py \
 --base_model="n2v" \
@@ -62,12 +54,14 @@ python main.py \
 --test_set="test" \
 --n_negative=1000000000 \
 --lr=0.1 \
+--n2v_p=1 \
+--n2v_q=0.5 \
 --seed=2020 \
 --dataset="CiteSeer" \
 --recdim=128 \
 --batch_size=128 \
 --epochs=2 \
---board_path="post-rebuttal-mlp"
+--board_path="jan-29"
 
 python main.py \
 --base_model="line" \
@@ -79,7 +73,7 @@ python main.py \
 --recdim=128 \
 --batch_size=128 \
 --epochs=20 \
---board_path="post-rebuttal-mlp"
+--board_path="jan-29"
 
 python main.py \
 --base_model="line" \
@@ -94,7 +88,7 @@ python main.py \
 --n_negative=-1 \
 --alpha=0.75 \
 --K=5 \
---board_path="post-rebuttal-mlp"
+--board_path="jan-29"
 
 python main.py \
 --base_model="line" \
@@ -108,22 +102,7 @@ python main.py \
 --recdim=128 \
 --batch_size=128 \
 --epochs=20 \
---board_path="post-rebuttal-mlp"
-
-# python main.py \
-# --base_model="line" \
-# --loss_func="sg_aug" \
-# --test_set="test" \
-# --n_negative=1000 \
-# --lr=0.1 \
-# --lam=0.01 \
-# --alpha=0.75 \
-# --seed=2020 \
-# --dataset="CiteSeer" \
-# --recdim=128 \
-# --batch_size=1 \
-# --epochs=8 \
-# --board_path="post-rebuttal-mlp-weighted"
+--board_path="jan-29"
 
 python main.py \
 --base_model="line" \
@@ -136,4 +115,4 @@ python main.py \
 --recdim=128 \
 --batch_size=128 \
 --epochs=2 \
---board_path="post-rebuttal-mlp"
+--board_path="jan-29"

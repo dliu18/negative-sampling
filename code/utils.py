@@ -157,7 +157,7 @@ def set_seed(seed):
     torch.manual_seed(seed)
 
 def getFileName():
-    file = f"{world.config['base_model']}-{world.config['loss_func']}-{world.config['n_negative']}-{world.dataset}.pth.tar"
+    file = f"{world.config['base_model']}-{world.config['loss_func']}-{world.config['n_negative']}-{world.config['lambda']}-{world.dataset}.pth.tar"
     return os.path.join(world.FILE_PATH,file)
 
 def shuffle(*arrays, **kwargs):

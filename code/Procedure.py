@@ -58,6 +58,9 @@ def train(dataset, sg_model, loss_obj, epoch, completed_batches, writer=None):
             writer.add_scalar(f'Loss/dimension_regularization', dimension_regularization, completed_batches)
         completed_batches += 1
     aver_loss = aver_loss / total_batch
+    if writer:
+        max_memory = torch.cuda.max_memory_allocated(device=torch.device("cuda"))
+        writer.add_scalar("GPU usage/memory (bytes)", max_memory, epoch)
     return f"loss: {aver_loss:,}", completed_batches
     
 def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=5, plot=False):
@@ -98,9 +101,9 @@ def train_edge_classifier(dataset, sg_model, loss_obj, writer=None, epochs=5, pl
 
 
 def test(dataset, sg_model, epoch, writer, prefix="", print_result=True, use_classifier=True):
-    max_memory = torch.cuda.max_memory_allocated(device=torch.device("cuda"))
-    if writer and prefix == "":
-        writer.add_scalar("GPU usage/memory (bytes)", max_memory, epoch)
+    # max_memory = torch.cuda.max_memory_allocated(device=torch.device("cuda"))
+    # if writer and prefix == "":
+    #     writer.add_scalar("GPU usage/memory (bytes)", max_memory, epoch)
 
     for test_set in ["valid", "test"]:
         test_data = None
@@ -128,7 +131,7 @@ def test(dataset, sg_model, epoch, writer, prefix="", print_result=True, use_cla
                 writer.add_scalar(prefix + f'metrics/{test_set}/{label}', all_mrr.mean(), epoch)
 
         # test Hits@k
-        for K in [20, 50, 100]:
+        for K in [1, 20, 50, 100]:
             label, all_hits = Evaluator.test_hits(sg_model, K, dataset, test_set, use_classifier)
             if print_result:
                 print(f'Hits@{K}: {all_hits.mean():.4f}')

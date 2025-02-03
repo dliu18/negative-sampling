@@ -1,0 +1,15 @@
+dataset,base_model,lr,batch_size,epochs,n2v_p,n2v_q
+CiteSeer,line,0.1,128,20,-1,-1
+CiteSeer,n2v,0.1,128,20,1,0.1
+Cora,line,0.1,128,20,-1,-1
+Cora,n2v,0.01,128,20,1,1
+PubMed,line,0.1,128,20,-1,-1
+PubMed,n2v,0.01,128,20,0.25,0.5
+ogbl-ppa,line,0.01,2048,5,-1,-1
+ogbl-ppa,n2v,0.01,2048,5,2,4
+ogbl-collab,line,0.1,1024,5,-1,-1
+ogbl-collab,n2v,0.1,1024,5,4,4
+ogbl-citation2,line,0.01,2048,3,-1,-1
+ogbl-citation2,n2v,0.01,2048,3,0.25,2
+ogbl-vessel,line,0.01,2048,3,-1,-1
+ogbl-vessel,n2v,0.01,2048,3,0.5,0.25

@@ -23,8 +23,8 @@ def get_last_metric_values_and_duration(event_file):
             last_values[tag] = scalar_events[-1].value
             if "metrics" in tag:
                 metric_values = np.array([event.value for event in scalar_events])
-                last_values[tag + " max"] = f"{np.max(metric_values):.4f}" 
-                last_values[tag + " max epoch"] = scalar_events[np.argmax(metric_values)].step
+                # last_values[tag + " max"] = f"{np.max(metric_values):.4f}" 
+                # last_values[tag + " max epoch"] = scalar_events[np.argmax(metric_values)].step
             final_steps[tag] = scalar_events[-1].step
             # print(scalar_events)
             # Collect timestamps for duration calculation
