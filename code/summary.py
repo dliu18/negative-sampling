@@ -16,31 +16,42 @@ def get_last_metric_values_and_duration(event_file):
     # Extract the last recorded value and step for each metric
     last_values = {}
     final_steps = {}
-    timestamps = []
+    all_timestamps = []
+    gpu_timestamps = []
     for tag in tags:
         scalar_events = event_accumulator.Scalars(tag)
         if scalar_events:
             last_values[tag] = scalar_events[-1].value
-            if "metrics" in tag:
+            if "metrics" or "GPU" in tag:
                 metric_values = np.array([event.value for event in scalar_events])
-                # last_values[tag + " max"] = f"{np.max(metric_values):.4f}" 
+                last_values[tag + " max"] = f"{np.max(metric_values):.4f}" 
                 # last_values[tag + " max epoch"] = scalar_events[np.argmax(metric_values)].step
             final_steps[tag] = scalar_events[-1].step
             # print(scalar_events)
             # Collect timestamps for duration calculation
-            timestamps.extend(event.wall_time for event in scalar_events)
+            all_timestamps.extend(event.wall_time for event in scalar_events)
+            if "GPU" in tag:
+                gpu_timestamps.extend(event.wall_time for event in scalar_events)
     
     # Calculate the duration based on timestamps
-    if timestamps:
-        duration = float(max(timestamps) - min(timestamps))
+    if all_timestamps and gpu_timestamps:
+        duration = float(max(gpu_timestamps) - min(all_timestamps))
         duration = f"{duration}"
     else:
         duration = 0
 
     # Extract the final step value for "metrics/MRR"
-    mrr_final_step = final_steps.get("Loss/total_loss", None)
+    final_step = final_steps.get("Loss/total_loss", None)
     
-    return last_values, duration, mrr_final_step
+
+    # Debug time information
+    # print(f"Start: {min(all_timestamps)}")
+    # print(f"Finished training embeddings: {max(gpu_timestamps)}")
+    # print(f"Finished script: {max(all_timestamps)}")
+    # print(f"Duration: {duration}")
+    # print("\n")
+
+    return last_values, duration, final_step
 
 def find_event_files(directory):
     event_files = []
@@ -96,3 +107,4 @@ if __name__ == '__main__':
     log_directory = 'runs/' +  dir_name # Replace with your log directory
     output_csv = f'summary-{dir_name}.csv'  # Replace with your desired output CSV file name
     create_csv_summary(log_directory, output_csv)
+    

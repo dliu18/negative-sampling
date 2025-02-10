@@ -1,6 +1,6 @@
 dataset,base_model,lr,batch_size,epochs,n2v_p,n2v_q
 CiteSeer,line,0.1,128,20,-1,-1
-CiteSeer,n2v,0.1,128,20,1,0.1
+CiteSeer,n2v,0.1,128,20,1,0.5
 Cora,line,0.1,128,20,-1,-1
 Cora,n2v,0.01,128,20,1,1
 PubMed,line,0.1,128,20,-1,-1

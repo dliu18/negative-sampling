@@ -11,7 +11,7 @@ def parse_args():
                         help="Is either 'test' or 'valid' i.e. validation")
     parser.add_argument('--test_set_frac', type=float,default=0.2,
                         help="Size of the test set split, as a fraction of the original dataset")
-    parser.add_argument('--lam', type=float,default=1.0,
+    parser.add_argument('--lam', type=float,default=0.0,
                         help="dimension regularization hyperparameter")
     parser.add_argument('--batch_size', type=int,default=128,
                         help="the batch size for bpr loss training procedure")

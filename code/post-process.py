@@ -1,3 +1,4 @@
+import sys
 import world
 import utils
 import dataloader
@@ -8,18 +9,19 @@ import torch
 import numpy as np
 from os.path import join
 import matplotlib.pyplot as plt
+
 # ==============================
 utils.set_seed(world.seed)
 print(">>SEED:", world.seed)
 # ==============================
 
-datasets = ["Cora", "CiteSeer", "PubMed", "ogbl-collab", "ogbl-ppa", "ogbl-citation2"]
+datasets = ["Cora", "CiteSeer", "PubMed", "ogbl-collab", "ogbl-ppa", "ogbl-citation2", "ogbl-vessel"]
 # datasets = ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]
 
-metrics = ["Hits@K", "MRR"]
-test_set = "test"
-base_model = "line"
-K = 50
+metrics = ["Hits@100", "MRR"]
+test_set = world.config["test_set"]
+base_model = world.config["base_model"]
+K = 100
 
 def color(name):
     colors = {
@@ -51,31 +53,36 @@ def get_loss_func_name(name):
     elif name == "no_neg":
         return "sg_aug"
     return name
+
 def get_n_negative(dataset_name, base_model, loss_func):
     n_negative_dict = {
         "Cora": {
             "line": 100,
-            "n2v": 10
+            "n2v": 5
         },
         "CiteSeer": {
             "line": 100,
-            "n2v": 100
+            "n2v": 10
         },
         "PubMed": {
             "line": 100, 
             "n2v": 100
         },
         "ogbl-collab": {
-            "line": 10,
-            "n2v": 10
+            "line": 1,
+            "n2v": 1
         },
         "ogbl-ppa": {
-            "line": 10,
-            "n2v": 10
+            "line": 5,
+            "n2v": 100
         },
         "ogbl-citation2": {
-            "line": 10,
-            "n2v": 10
+            "line": 5,
+            "n2v": 1
+        },
+        "ogbl-vessel": {
+            "line": 5,
+            "n2v": 1
         }
     }
     if loss_func == "sg":
@@ -87,6 +94,41 @@ def get_n_negative(dataset_name, base_model, loss_func):
     else: 
         return n_negative_dict[dataset_name][base_model]
 
+def get_lam(dataset_name, base_model, loss_func):
+    lam = {
+        "Cora": {
+            "line": 1.0,
+            "n2v": 100.0
+        },
+        "CiteSeer": {
+            "line": 1.0,
+            "n2v": 10.0
+        },
+        "PubMed": {
+            "line": 0.1, 
+            "n2v": 100.0
+        },
+        "ogbl-collab": {
+            "line": 1.0,
+            "n2v": 100.0
+        },
+        "ogbl-ppa": {
+            "line": 100.0,
+            "n2v": 100.0
+        },
+        "ogbl-citation2": {
+            "line": 100.0,
+            "n2v": 10.0
+        },
+        "ogbl-vessel": {
+            "line": 1.0,
+            "n2v": 1.0
+        }
+    }
+    if loss_func == "sg_aug":
+        return lam[dataset_name][base_model]
+    return 0.0
+
 if __name__ == "__main__":
     fig, axs = plt.subplots(nrows = len(metrics), ncols = len(datasets), figsize=(7 * len(datasets), 7 * len(metrics)))
 
@@ -94,7 +136,7 @@ if __name__ == "__main__":
         dataset = None
         if dataset_name in ["Cora", "CiteSeer", "PubMed"]:
             dataset = dataloader.SmallBenchmark(name=dataset_name, seed=world.seed)
-        elif dataset_name in ["ogbl-ppa", "ogbl-collab", "ogbl-citation2"]:
+        elif dataset_name in ["ogbl-ppa", "ogbl-collab", "ogbl-citation2", "ogbl-vessel"]:
             dataset = dataloader.OGBBenchmark(name=dataset_name, seed=world.seed)
         else:
             raise NotImplementedError(f"Haven't supported {dataset_name} yet!")
@@ -108,8 +150,9 @@ if __name__ == "__main__":
         for loss_func in ["sg", "sg_aug", "no_neg"]:
             print(f"{base_model} {loss_func}")
             n_negative = get_n_negative(dataset_name, base_model, loss_func)
+            lam = get_lam(dataset_name, base_model, loss_func)
             loss_func_name = get_loss_func_name(loss_func)
-            file = f"{base_model}-{loss_func_name}-{n_negative}-{dataset_name}.pth.tar"
+            file = f"{base_model}-{loss_func_name}-{n_negative}-{lam}-{dataset_name}.pth.tar"
             weight_file = join(world.FILE_PATH, file)
             print(f"load and save to {weight_file}")
             try:
@@ -152,4 +195,4 @@ if __name__ == "__main__":
             axs[r][c].set_ylabel(metrics[r])
             axs[r][c].set_title(datasets[c])
             # axs[r][c].set_xscale("log")
-    plt.savefig(f"../figs/post-rebuttal/metrics_by_clustering_coef_{base_model}.pdf", bbox_inches="tight")
+    plt.savefig(f"../figs/kdd25/metrics_by_clustering_coef_{base_model}.pdf", bbox_inches="tight")

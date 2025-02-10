@@ -18,7 +18,7 @@ print(">>SEED:", world.seed)
 import register
 from register import dataset
 
-train_mlp_epochs = [1, 5, 10, 15, 20]
+train_mlp_epochs = []
 
 sg_model = SGModel(world.config, dataset)
 sg_model = sg_model.to(world.device)

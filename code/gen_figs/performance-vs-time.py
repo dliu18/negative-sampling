@@ -1,6 +1,7 @@
 import pandas as pd 
 import matplotlib.pyplot as plt
 from sys import argv
+import fig_config
 
 current_alg = argv[1]
 xaxis = argv[2]
@@ -19,15 +20,6 @@ graph_to_idx = {
 	"ogbl-ppa": 4,
 	"ogbl-citation2": 5
 }
-
-plt.rcParams.update({
-    'font.size': 16,        # Default text font size
-    'axes.titlesize': 20,   # Title font size
-    'axes.labelsize': 18,   # X and Y label font size
-    'xtick.labelsize': 14,  # X-axis tick label font size
-    'ytick.labelsize': 14,  # Y-axis tick label font size
-    'legend.fontsize': 18   # Legend font size
-})
 
 def get_display_name(alg_name, loss_func, n_negative):
 	model_name = ""

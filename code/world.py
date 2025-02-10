@@ -14,7 +14,7 @@ DATA_PATH = join(ROOT_PATH, 'data')
 BOARD_PATH = join(CODE_PATH, 'runs')
 if len(args.board_path) > 0:
 	BOARD_PATH = join(BOARD_PATH, args.board_path)
-FILE_PATH = join(CODE_PATH, 'checkpoints', args.test_set)
+FILE_PATH = join(CODE_PATH, 'checkpoints', args.test_set, args.board_path)
 import sys
 sys.path.append(join(CODE_PATH, 'sources'))
 

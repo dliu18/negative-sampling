@@ -41,10 +41,6 @@ class BasicDataset(Dataset):
         raise NotImplementedError
 
     @property
-    def n_train_edges(self):
-        raise NotImplementedError
-
-    @property
     def n_valid_edges(self):
         raise NotImplementedError
         
@@ -52,6 +48,13 @@ class BasicDataset(Dataset):
     def n_test_edges(self):
         raise NotImplementedError
 
+    @property
+    def density(self):
+        # For undirected graphs, each edge is stored twice (one for each direction).
+        m = self.n_train_edges + self.n_test_edges + self.n_valid_edges
+        n = self.n_users
+        return m / (n * (n-1))
+    
     def get_degrees(self):
         raise NotImplementedError
 
@@ -196,6 +199,9 @@ class SmallBenchmark(BasicDataset):
     @property
     def n_test_edges(self):
         return self.test_edges.size(1)
+
+    def is_undirected(self):
+        return self.full_data.is_undirected()
 
     def get_degrees(self):
         return self.degrees
@@ -348,6 +354,9 @@ class OGBBenchmark(BasicDataset):
     def n_test_edges(self):
         return self.test_edges.size(1)
 
+    def is_undirected(self):
+        return self.full_data.is_undirected()
+
     def get_degrees(self):
         return self.degrees
 
@@ -443,36 +452,48 @@ class OGBBenchmark(BasicDataset):
             return torch.randint(high=self.n_users, generator=self.generator, size=(len(edge_idxs), NUM_MRR_NEGATIVES)).to(self.device)
 
 if __name__ == "__main__": 
-    for name in ["Cora", "CiteSeer", "PubMed", "SBM-0.7-0.008"]:
+    for name in ["Cora", "CiteSeer", "PubMed"]:
         dataset = SmallBenchmark(name, seed = 2020)
         print(
             name, 
             "\n Nodes: ",
-            dataset.n_users,
-            "\n Train edges: ",
-            dataset.n_train_edges,
-            "\n Validation edges: ",
-            dataset.n_valid_edges,
-            "\n Test edges: ",
-            dataset.n_test_edges,
+            f"{dataset.n_users:,.1e}",
+            "\n Edges: ",
+            f"{dataset.n_train_edges + dataset.n_valid_edges + dataset.n_test_edges:,.1e}",
+            # "\n Train edges: ",
+            # f"{dataset.n_train_edges:,.2e}",
+            # "\n Validation edges: ",
+            # f"{dataset.n_valid_edges:,.2e}",
+            # "\n Test edges: ",
+            # f"{dataset.n_test_edges:,.2e}",
             "\n Average Clustering Coefficient: ",
-            np.mean(dataset.get_clustering_coefs()),
+            f"{np.mean(dataset.get_clustering_coefs()):.2f}",
+            "\n Directed/Undirected: ",
+            "Undirected" if dataset.is_undirected() else "Directed",
+            "\n Density: ",
+            f"{dataset.density:.1e}",
             "\n"
         )
 
-    # for name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2"]:
-    #     dataset = OGBBenchmark(name, seed = 2020)
-    #     print(
-    #         name, 
-    #         "\n Nodes: ",
-    #         dataset.n_users,
-    #         "\n Train edges: ",
-    #         dataset.n_train_edges,
-    #         "\n Validation edges: ",
-    #         dataset.n_valid_edges,
-    #         "\n Test edges: ",
-    #         dataset.n_test_edges,
-    #         "\n Average Clustering Coefficient: ",
-    #         np.mean(dataset.get_clustering_coefs()),
-    #         "\n"
-    #     )
+    for name in ["ogbl-collab", "ogbl-ppa", "ogbl-citation2", "ogbl-vessel"]:
+        dataset = OGBBenchmark(name, seed = 2020)
+        print(
+            name, 
+            "\n Nodes: ",
+            f"{dataset.n_users:,.1e}",
+            "\n Edges: ",
+            f"{dataset.n_train_edges + dataset.n_valid_edges + dataset.n_test_edges:,.1e}",
+            # "\n Train edges: ",
+            # f"{dataset.n_train_edges:,.2e}",
+            # "\n Validation edges: ",
+            # f"{dataset.n_valid_edges:,.2e}",
+            # "\n Test edges: ",
+            # f"{dataset.n_test_edges:,.2e}",
+            "\n Average Clustering Coefficient: ",
+            f"{np.mean(dataset.get_clustering_coefs()):.2f}",
+            "\n Directed/Undirected: ",
+            "Undirected" if dataset.is_undirected() else "Directed",
+            "\n Density: ",
+            f"{dataset.density:.1e}",
+            "\n"
+        )

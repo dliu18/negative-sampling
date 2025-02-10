@@ -47,7 +47,7 @@ fi
 # n_negative
 # lam
 
-shared_args="--test_set=test seed=2020 recdim=128 board_path=$OUTPUT_PATH"
+
 
 # Read the rest of the CSV file, skipping the header
 tail -n +2 "$CSV_FILE" | while IFS=',' read -r "${headers[@]}"; do
@@ -62,34 +62,41 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r "${headers[@]}"; do
         done
 
         # echo "$shared_args ${args[@]}"
-        # vanilla
-        # python main.py --loss_func=sg "$shared_args ${args[@]} --board_path=$OUTPUT_PATH" 
+        # # vanilla
+        # set -x
+        # python main.py --loss_func=sg --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" 
+        # set +x 
 
         # weighted vanilla
-        # python main.py --loss_func=sg "$shared_args ${args[@]}" --n_negative=-1 --K=5 --alpha=0.75 "--board_path=$OUTPUT_PATH" 
+        set -x
+        python main.py --loss_func=sg --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" --n_negative=-1 --K=5 --alpha=0.75
+        set +x
 
         if [[ $epochs_index -ne -1 ]]; then
             args[$epochs_index]="--epochs=2"
         else
             echo "Warning: 'epochs' column not found. Running second execution without modification."
         fi
-        # echo "$shared_args ${args[@]}"
 
-        # no negative
-        # python main.py --loss_func=sg_aug "$shared_args ${args[@]}" --n_negative=1000000000 "--board_path=$OUTPUT_PATH"
+        # # no negative
+        # set -x
+        # python main.py --loss_func=sg_aug --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" --n_negative=1000000000
+        # set +x
+
         args[$epochs_index]="--epochs=${!headers[$epochs_index]}"
 
         tail -n +2 "$AUG_FILE" | while IFS=',' read -r "${aug_headers[@]}"; do
             if [[ "${!aug_headers[dataset_index]}" == "$DATASET_NAME" && "${!aug_headers[model_index]}" == "$model_name" ]]; then
-                aug_args=()
+                kdd_final_args=()
                 for i in "${!aug_headers[@]}"; do
-                    if [[ $i -ne $dataset_index ]]; then
-                        aug_args+=("--${aug_headers[i]}=${!aug_headers[i]}")
+                    if [[ $i -ne $dataset_index && $i -ne $model_index ]]; then
+                        kdd_final_args+=("--${aug_headers[i]}=${!aug_headers[i]}")
                     fi
                 done
-                # echo "${aug_args[@]}"
-                echo "python main.py --loss_func=sg_aug $shared_args ${args[@]} ${aug_args[@]} --board_path=$OUTPUT_PATH"
-                # python main.py --loss_func=sg_aug "$shared_args ${args[@]} ${aug_args[@]} --board_path=$OUTPUT_PATH"
+                # echo "${kdd_final_args[@]}"
+                set -x
+                python main.py --loss_func=sg_aug --test_set="test" --seed=2020 --recdim=128 --alpha=0.75 --board_path="$OUTPUT_PATH" "${args[@]}" "${kdd_final_args[@]}"
+                set +x
             fi
         done
     fi

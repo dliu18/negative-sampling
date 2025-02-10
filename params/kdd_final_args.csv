@@ -1,0 +1,15 @@
+dataset,base_model,n_negative,lam
+CiteSeer,line,100,1
+CiteSeer,n2v,10,10
+Cora,line,100,1
+Cora,n2v,5,100
+PubMed,line,100,0.1
+PubMed,n2v,100,100
+ogbl-ppa,line,5,100
+ogbl-ppa,n2v,100,100
+ogbl-collab,line,10,1
+ogbl-collab,n2v,10,100
+ogbl-citation2,line,5,100
+ogbl-citation2,n2v,5,0.1
+ogbl-vessel,line,5,1
+ogbl-vessel,n2v,5,1

@@ -25,13 +25,13 @@ def train(dataset, sg_model, loss_obj, epoch, completed_batches, writer=None):
     if world.config["base_model"] == 'n2v':
         loader = dataset.get_train_loader_rw(
             batch_size = world.config['batch_size'], 
-            sample_negatives = True,
+            sample_negatives = False,
             p=world.config["n2v_p"],
             q=world.config["n2v_q"])
     elif world.config["base_model"] == 'line':
         loader = dataset.get_train_loader_edges(
             batch_size = world.config['batch_size'], 
-            sample_negatives = True)
+            sample_negatives = False)
 
     num_edges = dataset.n_train_edges
     total_batch = num_edges // world.config['batch_size'] + 1

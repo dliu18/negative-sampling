@@ -4,25 +4,29 @@ import matplotlib.pyplot as plt
 from dataloader import SmallBenchmark
 import numpy as np 
 
-plt.rcParams.update({
-    'font.size': 14,        # Default text font size
-    'axes.titlesize': 16,   # Title font size
-    'axes.labelsize': 14,   # X and Y label font size
-    'xtick.labelsize': 14,  # X-axis tick label font size
-    'ytick.labelsize': 14,  # Y-axis tick label font size
-    'legend.fontsize': 12   # Legend font size
-})
+SMALL_SIZE = 16
+MEDIUM_SIZE = 18
+BIGGER_SIZE = 20
+
+plt.rc('font', size=SMALL_SIZE, family = "Nimbus Roman")          # controls default text sizes
+plt.rc('axes', titlesize=MEDIUM_SIZE)     # fontsize of the axes title
+plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
+plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
+plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
+plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
+
 
 key = "metrics/test/AUC_ROC"
 alg = world.config["base_model"]
 assert alg in ["n2v", "line"]
-alg_display_name = "node2vec" if alg=="n2v" else "line"
+alg_display_name = "node2vec" if alg=="n2v" else "LINE"
 
 if __name__ == "__main__":
 	fig, ax = plt.subplots()
 
 	# df = pd.read_csv("../../outputs/summary-sbm-final.csv")
-	df = pd.read_csv("../outputs/post-rebuttal/summary-sbm-ratio.csv")
+	df = pd.read_csv("../outputs/kdd25/summary-sbm-iclr-half.csv")
 
 	df = df[df['Model'] == alg]
 	df["p"] = [float(row.split("-")[1]) for row in df["Graph"]]
@@ -31,6 +35,7 @@ if __name__ == "__main__":
 
 	df = df.sort_values("p/q")
 	df = df[["Loss Function", "n_negative", "p", "q", key, "p/q"]]
+	df = df[df[key].notna()]
 	print(df)
 	# clustering_coefs = []
 	# for i in range(len(df)):
@@ -50,7 +55,7 @@ if __name__ == "__main__":
 	# y = df[mask][key]
 	# ax.plot(x, y, label = "LINE I (\u03B1 = 0.75)", color = "#e41a1c")
 
-	mask = (df["Loss Function"] == "sg_aug") & (df["n_negative"] <= 1000)
+	mask = (df["Loss Function"] == "sg_aug") & (df["n_negative"] == 10)
 	x = df[mask]["p/q"]
 	y = df[mask][key]
 	ax.plot(x, y, label = f"{alg_display_name} II", color = "#984ea3", linewidth = 2)
@@ -71,4 +76,4 @@ if __name__ == "__main__":
 	# ax.set_xlabel("Within-block edge probability")
 	ax.set_ylabel("AUC-ROC")
 	ax.set_xscale("log")
-	fig.savefig(f"../figs/post-rebuttal/sbm_series-ratio-{alg}.pdf", bbox_inches = "tight")	
+	fig.savefig(f"../figs/kdd25/sbm-{alg}.pdf", bbox_inches = "tight")	
