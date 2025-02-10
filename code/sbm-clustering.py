@@ -26,7 +26,7 @@ if __name__ == "__main__":
 	fig, ax = plt.subplots()
 
 	# df = pd.read_csv("../../outputs/summary-sbm-final.csv")
-	df = pd.read_csv("../outputs/kdd25/summary-sbm-iclr-half.csv")
+	df = pd.read_csv("../outputs/kdd25/summary-sbm.csv")
 
 	df = df[df['Model'] == alg]
 	df["p"] = [float(row.split("-")[1]) for row in df["Graph"]]

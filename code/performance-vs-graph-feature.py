@@ -20,7 +20,7 @@ plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
 
 
 if __name__ == "__main__":
-	df = pd.read_csv("../outputs/kdd25/summary-kdd-25-2.csv")
+	df = pd.read_csv("../outputs/kdd25/summary.csv")
 	df["AUC-ROC"] = df["metrics/test/AUC_ROC"]
 	df["MRR"] = df["metrics/test/MRR"]
 	df["Hits@100"] = df["metrics/test/Hits_100"]

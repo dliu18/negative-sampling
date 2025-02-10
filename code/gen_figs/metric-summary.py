@@ -12,10 +12,8 @@ def extract_metric(df_subset, model_symbol, metric_name):
 	elif model_symbol == "II'":
 		return df_subset.loc["sg_aug"].loc[1000000000][metric_name]
 
-df = pd.read_csv("../../outputs/kdd25/summary-kdd-25-2-weighted.csv")
+df = pd.read_csv("../../outputs/kdd25/summary.csv")
 
-# mask = (df["n_negative"] >= 0) 
-# df = df[mask]
 
 df["Time"] = df["Duration"] / 60
 df["AUC-ROC"] = df["metrics/test/AUC_ROC"]
@@ -47,16 +45,16 @@ for model in models:
 			try:
 				for model_variant in ["I", "II"]:
 					row[f"{metric} {model_variant}"] = f"{extract_metric(df_subset, model_variant, metric):.2f} "
-				# delta = 100 * (float(row[f"{metric} II"]) - float(row[f"{metric} I"])) / float(row[f"{metric} I"])
-				# suffix = "\%"
-				# if metric in ["AUC-ROC", "MRR", "Hits@50", "Hits@100"]:
-				# 	delta = max(
-				# 		float(row[f"{metric} II"]) - float(row[f"{metric} I"]),
-				# 		float(row[f"{metric} II'"]) - float(row[f"{metric} I"])
-				# 	)
-				# 	suffix = ""
-				# # row[f"{metric} Delta"] = f"({delta:.1f}\%) "
-				# row[f"{metric} Delta"] = f"{delta:.2f}{suffix}"
+				delta = 100 * (float(row[f"{metric} II"]) - float(row[f"{metric} I"])) / float(row[f"{metric} I"])
+				suffix = "\%"
+				if metric in ["AUC-ROC", "MRR", "Hits@50", "Hits@100"]:
+					delta = max(
+						float(row[f"{metric} II"]) - float(row[f"{metric} I"]),
+						float(row[f"{metric} II'"]) - float(row[f"{metric} I"])
+					)
+					suffix = ""
+				# row[f"{metric} Delta"] = f"({delta:.1f}\%) "
+				row[f"{metric} Delta"] = f"{delta:.2f}{suffix}"
 			except:
 				print(df_subset)
 				continue

@@ -10,4 +10,4 @@ python main.py \
 --recdim=128 \
 --batch_size=128 \
 --epochs=5 \
---board_path="debug-sbm"
+--board_path="debug"

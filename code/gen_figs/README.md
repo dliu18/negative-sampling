@@ -23,7 +23,7 @@ python performance-vs-graph-feature.py
 # Efficiency of Repulsion-less approach 
 ```
 cd gen_figs/
-python time-delta.py ../../outputs/kdd25/metric_summary_2.csv ../../figs/kdd25/time-delta.pdf
+python time-delta.py ../../outputs/kdd25/metric_summary.csv ../../figs/kdd25/time-delta.pdf
 ```
 
 # SBM Series 

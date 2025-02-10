@@ -1,9 +1,0 @@
-Graph,Model,Loss Function,n_negative,Learning Rate,lambda,Duration,Steps,Loss/positive_loss,Loss/negative_loss,Loss/total_loss,Loss/dimension_regularization,GPU_usage/memory__bytes_,metrics/valid/AUC_ROC,metrics/valid/AUC_ROC epoch,metrics/valid/MRR,metrics/valid/MRR epoch,metrics/valid/Hits_50,metrics/valid/Hits_50 epoch,metrics/test/AUC_ROC,metrics/test/AUC_ROC epoch,metrics/test/MRR,metrics/test/MRR epoch,metrics/test/Hits_50,metrics/test/Hits_50 epoch
-ogbl-citation2,line,sg_aug,1000,0.01,1e-06,2995,2,112.19181823730469,0.0,112.19181823730469,17220930371584.0,8017084928.0,0.6053,2,0.0213,2,0.0030,2,0.6085,2,0.0210,2,0.0028,2
-ogbl-citation2,line,sg_aug,1000,0.01,1e-07,1079,,3754.65625,0.0,3754.65625,8562836766720.0,,,,,,,,,,,,,
-ogbl-citation2,n2v,sg_aug,1000,0.01,1e-06,2213,3,13884.5205078125,0.0,13884.5205078125,3209584181248.0,15001152512.0,0.8230,3,0.0363,3,0.0029,2,0.8243,3,0.0361,3,0.0026,2
-ogbl-citation2,n2v,sg_aug,1000,0.01,1e-07,1884,3,3821.771484375,0.0,3821.771484375,40447036620800.0,15001152512.0,0.7686,3,0.0277,3,0.0023,3,0.7697,3,0.0277,3,0.0030,3
-ogbl-ppa,line,sg_aug,1000,0.01,0.0001,960,,113.62815856933594,0.0,113.62815856933594,681762357248.0,1973797888.0,0.6373,1,,,,,,,,,,
-ogbl-ppa,line,sg_aug,1000,1e-05,0.01,960,,262.3377685546875,0.0,262.3377685546875,616078.125,1973797888.0,0.4998,1,,,,,,,,,,
-ogbl-ppa,n2v,sg_aug,5,0.01,0.0001,203,,1417245.75,0.0,1417245.75,1388397440.0,10162352128.0,0.7991,1,,,,,,,,,,
-ogbl-ppa,n2v,sg_aug,5,0.01,1e-05,204,,1023667.5625,0.0,1023667.5625,198173048832.0,10162352128.0,0.7837,1,,,,,,,,,,

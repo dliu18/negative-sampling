@@ -1,3 +1,0 @@
-Downloading the datasets must be done on a login node due to ssl restriction on compute nodes.
-
-
