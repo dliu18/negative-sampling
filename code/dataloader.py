@@ -150,6 +150,8 @@ class SmallBenchmark(BasicDataset):
 
         data = dataset[0]
         self.full_data = data
+        if "SBM" in name:
+            self.full_data.num_nodes = 1000 * blocks #this supresses the warning since num_nodes can't always be inferred.
 
         split = RandomLinkSplit(is_undirected=data.is_undirected(),
             num_val = 0.1,
