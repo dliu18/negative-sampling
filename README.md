@@ -37,6 +37,25 @@ The below instructions are for reproducing the empirical evaluation results repo
 
 ### Hyperparameter tuning
 
+For details on selecting the optimal hyperparameter, please refer to Appendix B in the paper.
+
+1. Learning rate: for each dataset, execute the corresponding script in `code/scripts/hyperparamter-lr`. Then process all of the tensorboard outputs with (from the `code/` directory:
+```
+python summary.py lr_grid_search
+```
+
+2. node2vec parameters: for each dataset, execute the corresponding script in `code/scripts/hyperparameter-n2v`. Process the outputs with:
+```
+python summary.py n2v_grid_search
+```
+
+3. Augmentation parameters: for each dataset, execute the corresponding script in `code/scripts/hyperparameter-aug`. Process the outputs with:
+```
+python summary.py aug_grid_search
+```
+
+The final hyperparameters used for the paper are summarized in `params/hyperparameters.pdf`
+
 ### Model training
 
 ### Table and figure generation 
@@ -46,6 +65,3 @@ The below instructions are for reproducing the empirical evaluation results repo
 * Figure 4:
 * Table 5: 
 * Table 6: 
-
-
-## 
