@@ -54,14 +54,28 @@ python summary.py n2v_grid_search
 python summary.py aug_grid_search
 ```
 
-The final hyperparameters used for the paper are summarized in `params/hyperparameters.pdf`
+The final hyperparameters used for the paper are summarized in `params/hyperparameters.pdf`. These parameters are also stored in the csv files in `params/`, which will be processed for final model training.
 
 ### Model training
 
+For each dataset, execute the corresponding script in `scripts/eval`. For the SBM specific experiments, execute `./scripts/sbm-extended.sh sbm`.
+
+Process the final training runs with:
+```
+python summary.py kdd-25-2-weighted
+python summary.py sbm
+```
+
 ### Table and figure generation 
 
-* Tables 3 and 4:
-* Figure 3:
-* Figure 4:
-* Table 5: 
-* Table 6: 
+* Tables 3-6: these values are extracted directly from `summary-kdd-25-2-weighted.csv`, which is generated in the previous section. To validate the summary statistics, run:
+```
+cd gen_figs/
+python metric-summary.py
+```
+* Figure 3: the time delta bar chart values can be extracted from `summary-kdd-25-2-weighted.csv`. generate the scatter plots with `python performance-vs-graph-feature.py`.
+* Figure 4: generate the figures via
+```
+ python sbm-clustering.py --base_model=line
+ python sbm-clustering.py --base_model=n2v
+``` 
