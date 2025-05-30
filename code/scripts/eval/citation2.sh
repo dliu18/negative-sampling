@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./scripts/eval/eval.sh ../params/shared_args.csv ../params/kdd_final_args.csv ogbl-citation2 kdd-25-2-weighted
+./scripts/eval/eval.sh ../params/shared_args.csv ../params/kdd_final_args.csv ogbl-citation2 kdd-25-2

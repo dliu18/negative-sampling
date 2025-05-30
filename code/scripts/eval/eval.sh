@@ -63,14 +63,14 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r "${headers[@]}"; do
 
         # echo "$shared_args ${args[@]}"
         # # vanilla
-        # set -x
-        # python main.py --loss_func=sg --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" 
-        # set +x 
+        set -x
+        python main.py --loss_func=sg --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" 
+        set +x 
 
         # weighted vanilla
-        set -x
-        python main.py --loss_func=sg --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" --n_negative=-1 --K=5 --alpha=0.75
-        set +x
+        # set -x
+        # python main.py --loss_func=sg --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" --n_negative=-1 --K=5 --alpha=0.75
+        # set +x
 
         if [[ $epochs_index -ne -1 ]]; then
             args[$epochs_index]="--epochs=2"
@@ -79,9 +79,9 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r "${headers[@]}"; do
         fi
 
         # # no negative
-        # set -x
-        # python main.py --loss_func=sg_aug --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" --n_negative=1000000000
-        # set +x
+        set -x
+        python main.py --loss_func=sg_aug --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" --n_negative=1000000000
+        set +x
 
         args[$epochs_index]="--epochs=${!headers[$epochs_index]}"
 
@@ -94,9 +94,16 @@ tail -n +2 "$CSV_FILE" | while IFS=',' read -r "${headers[@]}"; do
                     fi
                 done
                 # echo "${kdd_final_args[@]}"
+
+                # non-weighted augmetnation
                 set -x
-                python main.py --loss_func=sg_aug --test_set="test" --seed=2020 --recdim=128 --alpha=0.75 --board_path="$OUTPUT_PATH" "${args[@]}" "${kdd_final_args[@]}"
+                python main.py --loss_func=sg_aug --test_set="test" --seed=2020 --recdim=128 --board_path="$OUTPUT_PATH" "${args[@]}" "${kdd_final_args[@]}"
                 set +x
+
+                # weighted augmentation
+                # set -x
+                # python main.py --loss_func=sg_aug --test_set="test" --seed=2020 --recdim=128 --alpha=0.75 --board_path="$OUTPUT_PATH" "${args[@]}" "${kdd_final_args[@]}"
+                # set +x
             fi
         done
     fi

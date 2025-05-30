@@ -58,22 +58,26 @@ The final hyperparameters used for the paper are summarized in `params/hyperpara
 
 ### Model training
 
-For each dataset, execute the corresponding script in `scripts/eval`. For the SBM specific experiments, execute `./scripts/sbm-extended.sh sbm`.
+* Non-weigthed versions: for each dataset, execute the corresponding script in `scripts/eval`. 
+* weighted versions (see Sec. 3.2.1 in the paper for details): in `scripts/eval/eval.sh` uncomment "weighted vanilla" and "weighted augmentation". Comment out "vanilla", "no negative", and "non-weighted augmentation". For each dataset-script in `scripts/eval`, make sure to update the file suffix e.g. kdd-25-2-weighted. Re-execute each script
+* SBM experiment: execute `./scripts/sbm-extended.sh sbm`.
 
 Process the final training runs with:
 ```
+python summary.py kdd-25-2
 python summary.py kdd-25-2-weighted
 python summary.py sbm
 ```
 
+Move the above csv output files to `output/`.
 ### Table and figure generation 
 
-* Tables 3-6: these values are extracted directly from `summary-kdd-25-2-weighted.csv`, which is generated in the previous section. To validate the summary statistics, run:
+* Tables 3-6: these values are extracted directly from `summary-kdd-25-2.csv` and `summary-kdd-25-2-weighted.csv`, which are generated in the previous section. To validate the summary statistics, run:
 ```
 cd gen_figs/
 python metric-summary.py
 ```
-* Figure 3: the time delta bar chart values can be extracted from `summary-kdd-25-2-weighted.csv`. generate the scatter plots with `python performance-vs-graph-feature.py`.
+* Figure 3: the time delta bar chart values can be extracted from `summary-kdd-25-2.csv`. generate the scatter plots with `python performance-vs-graph-feature.py`.
 * Figure 4: generate the figures via
 ```
  python sbm-clustering.py --base_model=line
