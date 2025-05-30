@@ -12,6 +12,7 @@ def extract_metric(df_subset, model_symbol, metric_name):
 	elif model_symbol == "II'":
 		return df_subset.loc["sg_aug"].loc[1000000000][metric_name]
 
+# change the file name here as needed. The format is summary-{file_suffix}.csv
 df = pd.read_csv("../../outputs/kdd25/summary.csv")
 
 

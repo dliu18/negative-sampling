@@ -39,7 +39,6 @@ class SGModel(BasicModel):
             embedding_dim=self.latent_dim,
             device=self.device)
 
-        # TODO: define the classifier 
         self.classifier = nn.Sequential(
             nn.Linear(2 * self.latent_dim, 128),  # Input: concatenated embeddings
             nn.ReLU(),
@@ -130,7 +129,6 @@ class SGModel(BasicModel):
         else:
             raise ValueError("Unsupported feature combination method")
 
-    # TODO: give the classifier output
     def forward(self, src, tgt, use_classifier, method="concatenate"):
         if use_classifier:
             edge_features = self._get_edge_features(src, tgt, method)

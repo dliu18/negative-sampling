@@ -59,7 +59,7 @@ The final hyperparameters used for the paper are summarized in `params/hyperpara
 ### Model training
 
 * Non-weigthed versions: for each dataset, execute the corresponding script in `scripts/eval`. 
-* weighted versions (see Sec. 3.2.1 in the paper for details): in `scripts/eval/eval.sh` uncomment "weighted vanilla" and "weighted augmentation". Comment out "vanilla", "no negative", and "non-weighted augmentation". For each dataset-script in `scripts/eval`, make sure to update the file suffix e.g. kdd-25-2-weighted. Re-execute each script
+* Weighted versions (see Sec. 3.2.1 in the paper for details): in `scripts/eval/eval.sh` uncomment "weighted vanilla" and "weighted augmentation". Comment out "vanilla", "no negative", and "non-weighted augmentation". For each dataset-script in `scripts/eval`, make sure to update the file suffix e.g. kdd-25-2-weighted. Re-execute each script
 * SBM experiment: execute `./scripts/sbm-extended.sh sbm`.
 
 Process the final training runs with:
@@ -70,6 +70,7 @@ python summary.py sbm
 ```
 
 Move the above csv output files to `output/`.
+
 ### Table and figure generation 
 
 * Tables 3-6: these values are extracted directly from `summary-kdd-25-2.csv` and `summary-kdd-25-2-weighted.csv`, which are generated in the previous section. To validate the summary statistics, run:
@@ -83,3 +84,4 @@ python metric-summary.py
  python sbm-clustering.py --base_model=line
  python sbm-clustering.py --base_model=n2v
 ``` 
+Note that the `sbm-clustering.py` script includes commented out code for averaging over multiple trials if needed. Each trial should have an index added to its file suffix.
