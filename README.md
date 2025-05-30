@@ -6,6 +6,8 @@ Published in KDD'25
 
 Paper on [ArXiv](https://arxiv.org/abs/2405.00172)
 
+[![DOI](https://zenodo.org/badge/851441881.svg)](https://doi.org/10.5281/zenodo.15557847)
+
 ## Code Environment
 All of the experiments were executed on a machine with a single NVIDIA V100 GPU. Unless otherwise noted, the conda environment specified in `requirements-sgns.txt` was used for all experiments.
 
